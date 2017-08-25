@@ -30,7 +30,7 @@
     cholSigmaInv <- sqrt(1/varComp)
     converged <- ifelse(family$family == "gaussian", TRUE, mod$converged)
     zeroFLAG <- NULL
-    RSS <- ifelse(family$family == "gaussian", sum(resid.marginal^2)/varComp/(n - ncol(X)), 1)
+    RSS <- ifelse(family$family == "gaussian", sum(resid.marginal^2)/varComp/(nrow(X) - ncol(X)), 1)
     
     return(list(family = family, hetResid = hetResid, varComp = varComp,
                 varCompCov = varCompCov, fixef = fixef, betaCov = betaCov, 
