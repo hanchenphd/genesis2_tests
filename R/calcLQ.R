@@ -1,15 +1,15 @@
 
 
-.calcLikelihoodQuantities <- function(Y, W, n, k, Sigma.inv, cholSigma.diag){
+.calcLikelihoodQuantities <- function(Y, X, n, k, Sigma.inv, cholSigma.diag){
     
     ### Calulate the weighted least squares estimate
-    Sigma.inv_W <- crossprod(Sigma.inv, W)
-    chol.Wt_Sigma.inv_W <- chol(crossprod(W, Sigma.inv_W))
-    Wt_Sigma.inv_W.inv <- chol2inv(chol.Wt_Sigma.inv_W)
-    beta <- crossprod(Wt_Sigma.inv_W.inv, crossprod(Sigma.inv_W, Y))
+    Sigma.inv_X <- crossprod(Sigma.inv, X)
+    chol.Xt_Sigma.inv_X <- chol(crossprod(X, Sigma.inv_X))
+    Xt_Sigma.inv_X.inv <- chol2inv(chol.Xt_Sigma.inv_X)
+    beta <- crossprod(Xt_Sigma.inv_X.inv, crossprod(Sigma.inv_X, Y))
     
     ## calculate the mean of the outcomes
-    fits <- tcrossprod(W, t(beta))
+    fits <- tcrossprod(X, t(beta))
     
     # obtain marginal residuals
     residM <- as.vector(Y - fits)
@@ -23,14 +23,14 @@
     
     ## log likelihood- REML type, accounting for estimation of mean effects.    
     logLikR <- as.numeric(logLik + 0.5 * k * log(2 * pi *
-                                                 RSS) - sum(log(diag(chol.Wt_Sigma.inv_W))))
+                                                 RSS) - sum(log(diag(chol.Xt_Sigma.inv_X))))
     
     
     ## calculate projection matrix.
-    P <- Sigma.inv - tcrossprod(tcrossprod(Sigma.inv_W, Wt_Sigma.inv_W.inv),
-                                Sigma.inv_W)
+    P <- Sigma.inv - tcrossprod(tcrossprod(Sigma.inv_X, Xt_Sigma.inv_X.inv),
+                                Sigma.inv_X)
     PY <- crossprod(P, Y)
     
-    return(list(P= P, PY = PY, RSS = RSS, logLik = logLik, logLikR = logLikR, Sigma.inv_R  = Sigma.inv_R , Sigma.inv_W = Sigma.inv_W, Wt_Sigma.inv_W.inv = Wt_Sigma.inv_W.inv, beta = beta, fits = fits, residM = residM))
+    return(list(P= P, PY = PY, RSS = RSS, logLik = logLik, logLikR = logLikR, Sigma.inv_R  = Sigma.inv_R , Sigma.inv_X = Sigma.inv_X, Xt_Sigma.inv_X.inv = Xt_Sigma.inv_X.inv, beta = beta, fits = fits, residM = residM))
 
 }

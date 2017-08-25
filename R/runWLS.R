@@ -3,7 +3,7 @@
 # n - number of people 
 # g - the number of groups (1 to more). if g == 1 group.idx is ignored. 
 #' @importFrom stats var
-.runWLSgaussian <- function (Y, W, g, start, AIREML.tol,
+.runWLSgaussian <- function (Y, X, g, start, AIREML.tol,
                              maxIter,  verbose){
     stopifnot(g > 1)
     n <- length(Y)
@@ -48,7 +48,7 @@
         Sigma.inv <- diag(Sigma.inv.diag )
 
 
-        lq <- .calcLikelihoodQuantities(Y, W, n, k, Sigma.inv, cholSigma.diag)
+        lq <- .calcLikelihoodQuantities(Y, X, n, k, Sigma.inv, cholSigma.diag)
 
         
         

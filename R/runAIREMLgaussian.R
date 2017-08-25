@@ -1,11 +1,11 @@
 #' @importFrom stats var
-.runAIREMLgaussian <- function(Y, W, start, covMatList, group.idx, AIREML.tol, dropZeros, maxIter, verbose){
+.runAIREMLgaussian <- function(Y, X, start, covMatList, group.idx, AIREML.tol, dropZeros, maxIter, verbose){
     
     # initial values
     m <- length(covMatList)
     g <- length(group.idx)
     n <- length(Y)
-    k <- ncol(W)
+    k <- ncol(X)
     sigma2.p <- drop(var(Y))
     AIREML.tol <- AIREML.tol*sigma2.p  # set convergence tolerance dependent on trait
     val <- 2 * AIREML.tol
@@ -42,7 +42,7 @@
         # inverse
         Sigma.inv <- chol2inv(cholSigma)
         
-        lq <- .calcLikelihoodQuantities(Y, W, n, k, Sigma.inv, diag(cholSigma))
+        lq <- .calcLikelihoodQuantities(Y, X, n, k, Sigma.inv, diag(cholSigma))
 
         
         # print current estimates

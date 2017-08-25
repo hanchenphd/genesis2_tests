@@ -1,9 +1,9 @@
 
-.runAIREMLother <- function(Y, W, start, covMatList, AIREML.tol, dropZeros, maxIter, verbose, vmu, gmuinv){
+.runAIREMLother <- function(Y, X, start, covMatList, AIREML.tol, dropZeros, maxIter, verbose, vmu, gmuinv){
     
     m <- length(covMatList)
     n <- length(Y)
-    k <- ncol(W)
+    k <- ncol(X)
     
     # initial values for variance components
     if(is.null(start)){
@@ -30,7 +30,7 @@
         # inverse
         Sigma.inv <- chol2inv(cholSigma)
         
-        lq <- .calcLikelihoodQuantities(Y, W, n, k, Sigma.inv, diag(cholSigma))
+        lq <- .calcLikelihoodQuantities(Y, X, n, k, Sigma.inv, diag(cholSigma))
 
         
         # print current estimates

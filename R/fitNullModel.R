@@ -78,7 +78,7 @@ fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "ga
                 if(verbose) message(paste(paste("Sigma^2_",c(names(covMatList)),sep="", collapse="     "), "log-lik", "RSS", sep="     "))
                 
                 # estimate variance components
-                out <- .runAIREMLother(Y=working.y, W=X, start=newstart, covMatList=covMatList, 
+                out <- .runAIREMLother(Y=working.y, X=X, start=newstart, covMatList=covMatList, 
                                        AIREML.tol=AIREML.tol, dropZeros=dropZeros, maxIter=maxIter, 
                                        verbose=verbose, vmu=vmu, gmuinv=gmuinv)
                 
