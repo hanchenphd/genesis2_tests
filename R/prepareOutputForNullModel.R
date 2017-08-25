@@ -3,7 +3,7 @@
 
 ### preparing output arguments for regression models that are not mixed. To match mixed models, 
 ## we call "sigma" varComp (because it can be viewd as a type of variance component)/
-
+#' @importFrom stats residuals vcov
 .nullModOutReg <- function(y, X, mod, family){
 	family$mixedmodel <- FALSE
 	
@@ -44,6 +44,7 @@
 
 
 ### updated later for using sparsity...
+#' @importFrom stats pchisq
 .nullModOutWLS <- function(y, X, vc.mod, family, group.idx, use.sparsity = FALSE){
 	family$mixedmodel <- FALSE
 	
@@ -111,6 +112,7 @@
 
 
 
+#' @importFrom stats pchisq
 .nullModOutMM <- function(y, X, vc.mod, family, covMatList , group.idx = NULL,  use.sparsity = FALSE, dropZeros = TRUE){
 	n <- nrow(X)
 	k <- ncol(X)

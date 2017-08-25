@@ -1,4 +1,4 @@
-
+#' @importFrom stats var
 .runAIREMLgaussian <- function(Y, W, start, covMatList, group.idx, AIREML.tol, dropZeros, maxIter, verbose){
     
     # initial values

@@ -4,6 +4,21 @@
 ## X is assumed to have an intercept. 
 ## non-gaussian families can only be binomial and poisson. 
 
+#' Fit null model
+#'
+#' @param y outcome vector
+#' @param X data.frame or model.matrix
+#' @param covMatList A list of matrices specifying the covariance structures of the random effects terms
+#' @param group.idx group variable (index?)
+#' @param family A description of the error distribution to be used in the model. The default "gaussian" fits a linear mixed model; see \code{\link{family}} for further options.
+#' @param AIREML.tol The convergence threshold for the Average Information REML (AIREML) procedure used to estimate the variance components of the random effects.
+#' @param maxIter The maximum number of iterations allowed in the AIREML procedure
+#' @param dropZeros Logical indicator of whether variance component terms that converge to 0 should be removed from the model
+#' @param verbose Logical indicator of whether updates from the function should be printed to the console
+#' @return The null model (TODO fill in details)
+#'
+#' @importFrom stats glm lm
+#' @export
 fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "gaussian", 
 							AIREML.tol = 1e-6, maxIter = 100, dropZeros = TRUE, verbose = TRUE){
 	
@@ -20,7 +35,7 @@ fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "ga
 	## may be transferred to the wrapper function. 
 	if(is.character(family)){
         family <- get(family)
-    }
+     }
     if(is.function(family)){
         family <- family()
     }
