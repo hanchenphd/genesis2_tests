@@ -39,9 +39,9 @@
         if(reps > 1){
             # Average Information and Scores
             covMats.score.AI <- .calcAIcovMats(lq$P, lq$PY, m, covMatList)
-			AI <- covMats.score.AI$AI
-			score <- covMats.score.AI$score
-                        
+            AI <- covMats.score.AI$AI
+            score <- covMats.score.AI$score
+            
             if(dropZeros){  ## here need to exit if all terms were zero!!
                 # remove Zero terms
                 AI <- AI[!zeroFLAG,!zeroFLAG]

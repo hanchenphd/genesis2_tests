@@ -4,13 +4,12 @@
 # g - the number of groups (1 to more). if g == 1 group.idx is ignored. 
 #' @importFrom stats var
 .runWLSgaussian <- function (Y, W, g, start, AIREML.tol,
-    maxIter,  verbose)
-{
-	stopifnot(g > 1)
-	n <- length(Y)
-	k <- ncol(X)
-	g <- length(group.idx)
-   	## initializing parameters
+                             maxIter,  verbose){
+    stopifnot(g > 1)
+    n <- length(Y)
+    k <- ncol(X)
+    g <- length(group.idx)
+    ## initializing parameters
     sigma2.p <- var(Y)
     AIREML.tol <- AIREML.tol * sigma2.p
     val <- 2 * AIREML.tol
@@ -25,7 +24,7 @@
     repeat ({
         reps <- reps + 1
         
-         if (reps > maxIter) {
+        if (reps > maxIter) {
             converged <- FALSE
             warning("Maximum number of iterations reached without convergence!")
             (break)()
@@ -34,34 +33,34 @@
         
         ### Sigma is the matrix of variances. All non-diagonals are zero. 
         ## initialize Sigma (we don't need Sigma = only its diagonal!)
-		diagSigma <- rep(0, n)
-		
-		## set the values of the diagonal to be the group-specific variances. 
+        diagSigma <- rep(0, n)
+        
+        ## set the values of the diagonal to be the group-specific variances. 
         for (i in 1:g) {
-         	diagSigma[group.idx[[i]]] <- sigma2.k[i]
-         }
- 
-		 ## just the diagonal - squared root of diagonals, and inverse of diagonals of Sigma.
-		 cholSigma.diag <- sqrt(diagSigma)
-		 Sigma.inv.diag <- 1/diagSigma
-		 
-		 cholSigma <- diag(cholSigma.diag)
-         Sigma.inv <- diag(Sigma.inv.diag )
+            diagSigma[group.idx[[i]]] <- sigma2.k[i]
+        }
+        
+        ## just the diagonal - squared root of diagonals, and inverse of diagonals of Sigma.
+        cholSigma.diag <- sqrt(diagSigma)
+        Sigma.inv.diag <- 1/diagSigma
+        
+        cholSigma <- diag(cholSigma.diag)
+        Sigma.inv <- diag(Sigma.inv.diag )
 
 
-		lq <- .calcLikelihoodQuantities(Y, W, n, k, Sigma.inv, cholSigma.diag)
+        lq <- .calcLikelihoodQuantities(Y, W, n, k, Sigma.inv, cholSigma.diag)
 
-            
-            
+        
+        
         if (verbose)  print(c(sigma2.k, lq$logLikR, lq$RSS))
-         
+        
 
         ## Updating variances and calculating their covariance matrix
         if (reps > 1) {
-        	
-        	score.AI <- .calcAIhetvars(lq$P, lq$PY, g, group.idx)
-        	score    <- score.AI$score
-        	AI       <- score.AI$AI
+            
+            score.AI <- .calcAIhetvars(lq$P, lq$PY, g, group.idx)
+            score    <- score.AI$score
+            AI       <- score.AI$AI
             AIinvScore <- solve(AI, score)
 
             sigma2.kplus1 <- sigma2.k + AIinvScore
@@ -77,25 +76,25 @@
 
             if (val < AIREML.tol) {
             	converged <- TRUE
-            (break)()
-        }
+                (break)()
+            }
         }
         else { # first rep
             sigma2.kplus1 <- rep(NA, g)
 
-             for (i in 1:g) {
+            for (i in 1:g) {
              	sigma2.kplus1[i] <- (1/n) * (sigma2.k[i]^2 * crossprod(lq$PY[group.idx[[i]]]) + 
-             				n *sigma2.k[ i] - sigma2.k[i]^2 * sum(diag(lq$P)[group.idx[[i]]]))
-                }
+                                                         n *sigma2.k[ i] - sigma2.k[i]^2 * sum(diag(lq$P)[group.idx[[i]]]))
+            }
 
             sigma2.k <- sigma2.kplus1
         }
     })
     eta <- lq$fits
     return(list(varComp = sigma2.k, AI = AI, converged = converged,
-         Sigma.inv = Sigma.inv, beta = lq$beta, 
-        residM = lq$residM, fits = lq$fits, eta = eta, logLikR = lq$logLikR,
-        logLik = lq$logLik, RSS = lq$RSS))
+                Sigma.inv = Sigma.inv, beta = lq$beta, 
+                residM = lq$residM, fits = lq$fits, eta = eta, logLikR = lq$logLikR,
+                logLik = lq$logLik, RSS = lq$RSS))
 }
 
 

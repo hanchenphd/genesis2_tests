@@ -55,7 +55,7 @@
         }
         
         ## check if exceeded the number of iterations
- 		if (reps > maxIter) {
+        if (reps > maxIter) {
             converged <- FALSE
             warning("Maximum number of iterations reached without convergence!")
             (break)()
@@ -69,13 +69,13 @@
             score <- rep(NA,(m+g))
             
             covMats.score.AI <- .calcAIcovMats(Y = Y, P = lq$P, 
-            					PY = lq$PY, m = m, covMatList = covMatList)
+                                               PY = lq$PY, m = m, covMatList = covMatList)
             AI[1:m, 1:m] <- covMats.score.AI$AI
             score[1:m]  <- covMats.score.AI$score
-             
+            
             het.vars.score.AI <- .calcAIhetvars(lq$P, lq$PY, g, group.idx)
-			score[(m + 1):(m + g)]  <- het.vars.score.AI$score
-			AI[(m + 1):(m + g),(m+1):(m + g)]  <- het.vars.score.AI$AI
+            score[(m + 1):(m + g)]  <- het.vars.score.AI$score
+            AI[(m + 1):(m + g),(m+1):(m + g)]  <- het.vars.score.AI$AI
             
             ### take care of "off diagonal" (terms for covariance between variance components corresponding to 
             ### the covariance matriecs, and the residuals variances) 
@@ -116,7 +116,7 @@
             
             zeroFLAG <- sigma2.kplus1 < AIREML.tol
             sigma2.kplus1[zeroFLAG] <- 0
-			val <- sqrt(sum((sigma2.kplus1 - sigma2.k)^2))
+            val <- sqrt(sum((sigma2.kplus1 - sigma2.k)^2))
 
             # update estimates
             sigma2.k <- sigma2.kplus1
@@ -149,5 +149,5 @@
 
 
 
-      
-         
+
+
