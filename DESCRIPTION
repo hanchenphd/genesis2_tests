@@ -1,4 +1,4 @@
-Package: genesis2
+Package: genesis2tests
 Version: 0.1.0
 Type: Package
 Title: genesis assocation testing code rewrite
