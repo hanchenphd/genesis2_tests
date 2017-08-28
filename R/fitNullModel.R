@@ -70,7 +70,7 @@ fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "ga
         if (!is.null(covMatList)){ ## iterate between computing workingY and estimating VCs. 
             eta <- mod$linear.predictors
             working.y <- .calcWorkingYnonGaussian(y, eta, family)
-            newstart <- start
+            newstart <- NULL
             Yreps <- 0
             repeat({
                 Yreps <- Yreps + 1
