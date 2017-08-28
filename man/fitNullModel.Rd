@@ -11,11 +11,11 @@ fitNullModel(y, X, covMatList = NULL, group.idx = NULL,
 \arguments{
 \item{y}{outcome vector}
 
-\item{X}{data.frame or model.matrix}
+\item{X}{model.matrix}
 
 \item{covMatList}{A list of matrices specifying the covariance structures of the random effects terms}
 
-\item{group.idx}{group variable (index?)}
+\item{group.idx}{list of indices for each group level}
 
 \item{family}{A description of the error distribution to be used in the model. The default "gaussian" fits a linear mixed model; see \code{\link{family}} for further options.}
 

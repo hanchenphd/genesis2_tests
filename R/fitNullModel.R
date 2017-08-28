@@ -7,7 +7,7 @@
 #' Fit null model
 #'
 #' @param y outcome vector
-#' @param X data.frame or model.matrix
+#' @param X model.matrix
 #' @param covMatList A list of matrices specifying the covariance structures of the random effects terms
 #' @param group.idx list of indices for each group level
 #' @param family A description of the error distribution to be used in the model. The default "gaussian" fits a linear mixed model; see \code{\link{family}} for further options.
