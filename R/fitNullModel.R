@@ -78,9 +78,9 @@ fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "ga
                 if(verbose) message(paste(paste("Sigma^2_",c(names(covMatList)),sep="", collapse="     "), "log-lik", "RSS", sep="     "))
                 
                 # estimate variance components
-                out <- .runAIREMLother(Y=working.y, X=X, start=newstart, covMatList=covMatList, 
+                out <- .runAIREMLother(Y=working.y$Y, X=X, start=newstart, covMatList=covMatList, 
                                        AIREML.tol=AIREML.tol, dropZeros=dropZeros, maxIter=maxIter, 
-                                       verbose=verbose, vmu=vmu, gmuinv=gmuinv)
+                                       verbose=verbose, vmu=working.y$vmu, gmuinv=working.y$gmuinv)
                 
                 if (out$allZero == TRUE) {
                     message("All variance components estimated as zero, using glm...")
@@ -109,7 +109,7 @@ fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "ga
             if (out$allZero == TRUE){
                 out <- .nullModOutReg(y, X, mod, family)
             } else{
-                out <- .nullModOutMM(y, X, vc.mod, family, covMatList = covMatList,  dropZeros = dropZeros)
+                out <- .nullModOutMM(y, X, vc.mod, family, covMatList = covMatList, vmu=working.y$vmu, gmuinv=working.y$gmuinv, dropZeros = dropZeros)
             }	
         } else{
             out <- .nullModOutReg(y, X, mod, family)
@@ -143,5 +143,5 @@ fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "ga
     # working vector
     Y <- eta + (y - mu)/gmuinv
 
-    return(Y)
+    return(list(Y=Y, vmu=vmu, gmuinv=gmuinv))
 }

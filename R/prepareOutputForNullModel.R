@@ -49,7 +49,7 @@
     family$mixedmodel <- FALSE
     
     if (is.null(names(group.idx))){
-        group.names <- paste0("G", 1:g)
+        group.names <- paste0("G", seq_along(group.idx))
     } else { # there are names
         group.names <- names(group.idx)
     }
@@ -113,7 +113,7 @@
 
 
 #' @importFrom stats pchisq
-.nullModOutMM <- function(y, X, vc.mod, family, covMatList , group.idx = NULL,  use.sparsity = FALSE, dropZeros = TRUE){
+.nullModOutMM <- function(y, X, vc.mod, family, covMatList, group.idx = NULL, vmu = NULL, gmuinv = NULL, use.sparsity = FALSE, dropZeros = TRUE){
     n <- nrow(X)
     k <- ncol(X)
     m <- length(covMatList)

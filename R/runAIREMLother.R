@@ -98,7 +98,8 @@
     })
     
     # linear predictor
-    eta <- fits + crossprod(Vre, VinvR) # X\beta + Zb
+    ## what is VinvR ???
+    eta <- lq$fits + crossprod(Vre, VinvR) # X\beta + Zb
     
     return(list(allZero = FALSE, sigma2.k = sigma2.k, AI = AI, converged = converged, zeroFLAG = zeroFLAG, beta = lq$beta, eta = lq$eta, logLikR=lq$logLikR, logLik=lq$logLik, RSS=lq$RSS))
 
