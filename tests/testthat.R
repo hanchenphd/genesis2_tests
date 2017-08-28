@@ -1,4 +1,4 @@
 library(testthat)
-library(genesis2)
+library(genesis2tests)
 
-test_check("genesis2")
+test_check("genesis2tests")
