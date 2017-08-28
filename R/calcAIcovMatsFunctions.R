@@ -1,5 +1,6 @@
 
-.calcAIcovMats <- function(Y, P, PY, m, covMatList){
+.calcAIcovMats <- function(Y, P, PY, covMatList){
+    m <- length(covMatList)
     AI <- matrix(NA, nrow =  m, ncol = m)
     score <- rep(NA, m)
     
@@ -18,7 +19,9 @@
 }	
 
 
-.calcAIcovMatsResids <- function(P, PY, m, covMatList, g, group.idx){
+.calcAIcovMatsResids <- function(P, PY, covMatList, group.idx){
+    m <- length(covMatList)
+    g <- length(group.idx)
     AI <- matrix(NA, nrow =  m, ncol = g)
     
     for(i in 1:m){
@@ -36,7 +39,8 @@
 }
 
 
-.calcAIhetvars <- function(P, PY, g, group.idx){
+.calcAIhetvars <- function(P, PY, group.idx){
+    g <- length(group.idx)
     
     if (g == 1){
         score <-  -0.5*(sum(diag(P)) - crossprod(PY)) 

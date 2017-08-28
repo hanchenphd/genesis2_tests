@@ -69,18 +69,18 @@
             score <- rep(NA,(m+g))
             
             covMats.score.AI <- .calcAIcovMats(Y = Y, P = lq$P, 
-                                               PY = lq$PY, m = m, covMatList = covMatList)
+                                               PY = lq$PY, covMatList = covMatList)
             AI[1:m, 1:m] <- covMats.score.AI$AI
             score[1:m]  <- covMats.score.AI$score
             
-            het.vars.score.AI <- .calcAIhetvars(lq$P, lq$PY, g, group.idx)
+            het.vars.score.AI <- .calcAIhetvars(lq$P, lq$PY, group.idx)
             score[(m + 1):(m + g)]  <- het.vars.score.AI$score
             AI[(m + 1):(m + g),(m+1):(m + g)]  <- het.vars.score.AI$AI
             
             ### take care of "off diagonal" (terms for covariance between variance components corresponding to 
             ### the covariance matriecs, and the residuals variances) 
             
-            AI.off <- .calcAIcovMatsResids(lq$P, lq$PY, m, covMatList, g, group.idx)
+            AI.off <- .calcAIcovMatsResids(lq$P, lq$PY, covMatList, group.idx)
             AI[1:m, (m + 1):(m + g)] <- AI.off
             AI[(m + 1):(m + g),1:m ] <- t(AI.off)
             

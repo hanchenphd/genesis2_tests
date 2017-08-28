@@ -9,7 +9,7 @@
 #' @param y outcome vector
 #' @param X data.frame or model.matrix
 #' @param covMatList A list of matrices specifying the covariance structures of the random effects terms
-#' @param group.idx group variable (index?)
+#' @param group.idx list of indices for each group level
 #' @param family A description of the error distribution to be used in the model. The default "gaussian" fits a linear mixed model; see \code{\link{family}} for further options.
 #' @param AIREML.tol The convergence threshold for the Average Information REML (AIREML) procedure used to estimate the variance components of the random effects.
 #' @param maxIter The maximum number of iterations allowed in the AIREML procedure
@@ -53,7 +53,7 @@ fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "ga
             out <- .nullModOutReg(y, X, mod, family)
         }
         if (is.null(covMatList) & !is.null(group.idx)){
-            vc.mod <- .runWLSgaussian(y, X, g= length(group.idx), start = NULL, 
+            vc.mod <- .runWLSgaussian(y, X, group.idx = group.idx, start = NULL, 
                                       AIREML.tol = AIREML.tol,   maxIter = maxIter,  verbose = verbose)
             out <- .nullModOutWLS(y, X, vc.mod = vc.mod, family =  family, group.idx = group.idx)
         }

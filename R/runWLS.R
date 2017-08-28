@@ -3,12 +3,12 @@
 # n - number of people 
 # g - the number of groups (1 to more). if g == 1 group.idx is ignored. 
 #' @importFrom stats var
-.runWLSgaussian <- function (Y, X, g, start, AIREML.tol,
+.runWLSgaussian <- function (Y, X, group.idx, start, AIREML.tol,
                              maxIter,  verbose){
-    stopifnot(g > 1)
     n <- length(Y)
     k <- ncol(X)
     g <- length(group.idx)
+    if (g <= 1) stop("group.idx must have length > 1")
     ## initializing parameters
     sigma2.p <- var(Y)
     AIREML.tol <- AIREML.tol * sigma2.p
@@ -58,7 +58,7 @@
         ## Updating variances and calculating their covariance matrix
         if (reps > 1) {
             
-            score.AI <- .calcAIhetvars(lq$P, lq$PY, g, group.idx)
+            score.AI <- .calcAIhetvars(lq$P, lq$PY, group.idx)
             score    <- score.AI$score
             AI       <- score.AI$AI
             AIinvScore <- solve(AI, score)

@@ -38,7 +38,7 @@
 
         if(reps > 1){
             # Average Information and Scores
-            covMats.score.AI <- .calcAIcovMats(lq$P, lq$PY, m, covMatList)
+            covMats.score.AI <- .calcAIcovMats(lq$P, lq$PY, covMatList)
             AI <- covMats.score.AI$AI
             score <- covMats.score.AI$score
             
