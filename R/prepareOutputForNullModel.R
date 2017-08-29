@@ -113,7 +113,7 @@
 
 
 #' @importFrom stats pchisq
-.nullModOutMM <- function(y, X, vc.mod, family, covMatList, group.idx = NULL, vmu = NULL, gmuinv = NULL, use.sparsity = FALSE, dropZeros = TRUE){
+.nullModOutMM <- function(y, workingY, X, vc.mod, family, covMatList, group.idx = NULL, vmu = NULL, gmuinv = NULL, use.sparsity = FALSE, dropZeros = TRUE){
     n <- nrow(X)
     k <- ncol(X)
     m <- length(covMatList)
@@ -204,10 +204,10 @@
     
     eta <- vc.mod$eta
     
-    workingY <- y
+    workingY <- workingY
     outcome <- y
     
-    resid.conditional <-  as.vector(workingY - vc.mod$eta) ### 
+    resid.conditional <-  as.vector(drop(workingY) - vc.mod$eta) ### 
     
     model.matrix <- X 
     
