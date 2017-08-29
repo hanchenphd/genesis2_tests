@@ -90,6 +90,24 @@
             sigma2.k <- sigma2.kplus1
         }
     })
+    
+    ## after convergence, updated sigma again
+	for (i in 1:g) {
+		diagSigma[group.idx[[i]]] <- sigma2.k[i]
+	}
+        
+	## just the diagonal - squared root of diagonals, and inverse of diagonals of Sigma.
+	cholSigma.diag <- sqrt(diagSigma)
+	Sigma.inv.diag <- 1/diagSigma
+        
+	cholSigma <- diag(cholSigma.diag)
+	Sigma.inv <- diag(Sigma.inv.diag )
+
+	lq <- .calcLikelihoodQuantities(Y, X, n, k, Sigma.inv, cholSigma.diag)
+	score.AI <- .calcAIhetvars(lq$P, lq$PY, group.idx)
+	AI       <- score.AI$AI
+
+
     eta <- lq$fits
     return(list(varComp = sigma2.k, AI = AI, converged = converged,
                 Sigma.inv = Sigma.inv, beta = lq$beta, 
