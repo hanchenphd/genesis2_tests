@@ -7,7 +7,7 @@
 #' Fit null model
 #'
 #' @param y outcome vector
-#' @param X model.matrix
+#' @param X data.frame or model.matrix
 #' @param covMatList A list of matrices specifying the covariance structures of the random effects terms
 #' @param group.idx list of indices for each group level
 #' @param family A description of the error distribution to be used in the model. The default "gaussian" fits a linear mixed model; see \code{\link{family}} for further options.
@@ -59,7 +59,8 @@ fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "ga
         }
         if (!is.null(covMatList)){
             vc.mod <- .runAIREMLgaussian(y, X, start = NULL, covMatList, group.idx, AIREML.tol, dropZeros,  maxIter,  verbose)
-            out <- .nullModOutMM(y, X, vc.mod, family = family, covMatList = covMatList, 
+            out <- .nullModOutMM(y = y, workingY = y,  X = X, vc.mod = vc.mod, 
+            					family = family, covMatList = covMatList, 
                                  group.idx = group.idx, dropZeros = dropZeros)
         }
     } 
@@ -78,38 +79,40 @@ fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "ga
                 if(verbose) message(paste(paste("Sigma^2_",c(names(covMatList)),sep="", collapse="     "), "log-lik", "RSS", sep="     "))
                 
                 # estimate variance components
-                out <- .runAIREMLother(Y=working.y$Y, X=X, start=newstart, covMatList=covMatList, 
+                vc.mod <- .runAIREMLother(Y=working.y$Y, X=X, start=newstart, covMatList=covMatList, 
                                        AIREML.tol=AIREML.tol, dropZeros=dropZeros, maxIter=maxIter, 
                                        verbose=verbose, vmu=working.y$vmu, gmuinv=working.y$gmuinv)
                 
-                if (out$allZero == TRUE) {
+                if (vc.mod$allZero == TRUE) {
                     message("All variance components estimated as zero, using glm...")
                     break()
                 }
                 # update parameters
                 if(verbose) message("Updating WorkingY Vector...")
-                working.y <- .calcWorkingYnonGaussian(y, out$eta, family)
+                working.y <- .calcWorkingYnonGaussian(y, vc.mod$eta, family)
                 
                 # current variance component estimate
-                newstart <- out$sigma2.k
-                newstart[out$zeroFLAG] <- AIREML.tol
+                newstart <- vc.mod$varComp
+                newstart[vc.mod$zeroFLAG] <- AIREML.tol
                 
                 # test for convergence
-                stat <- sqrt(sum((out$eta - eta)^2))
+                stat <- sqrt(sum((vc.mod$eta - eta)^2))
                 if(verbose) message(paste("Checking for Convergence...", stat, sep = "\t"))
-                eta <- out$eta
+                eta <- vc.mod$eta
                 if(stat < AIREML.tol){ break() }
                 if(Yreps == maxIter){
-                    out$converged <- FALSE
+                    vc.mod$converged <- FALSE
                     warning("Maximum number of iterations for workingY reached without convergence!")
                     break()
                 }
             })
 	    ## check whether all variance components were estimated as zero:
-            if (out$allZero == TRUE){
+            if (vc.mod$allZero == TRUE){
                 out <- .nullModOutReg(y, X, mod, family)
             } else{
-                out <- .nullModOutMM(y, X, vc.mod, family, covMatList = covMatList, vmu=working.y$vmu, gmuinv=working.y$gmuinv, dropZeros = dropZeros)
+                out <- .nullModOutMM(y = y, workingY = working.y$Y, X = X, 
+                vc.mod = vc.mod, family = family, covMatList = covMatList, 
+                vmu=working.y$vmu, gmuinv=working.y$gmuinv, dropZeros = dropZeros)
             }	
         } else{
             out <- .nullModOutReg(y, X, mod, family)
