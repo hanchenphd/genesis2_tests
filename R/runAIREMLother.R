@@ -16,7 +16,7 @@
     repeat({
         reps <- reps+1
         
-        zeroFLAG <- sigma2.k < AIREML.tol # which elements have converged to "0"
+        zeroFLAG <- (sigma2.k < AIREML.tol) # which elements have converged to "0"
         sigma2.k[zeroFLAG] <- 0 # set these to 0
         
         if (sum(zeroFLAG) == m)  return(list(allZero = TRUE))
@@ -38,7 +38,7 @@
 
         if(reps > 1){
             # Average Information and Scores
-            covMats.score.AI <- .calcAIcovMats(lq$P, lq$PY, covMatList)
+            covMats.score.AI <- .calcAIcovMats(Y, lq$P, lq$PY, covMatList)
             AI <- covMats.score.AI$AI
             score <- covMats.score.AI$score
             
@@ -97,11 +97,12 @@
         
     })
     
-    # linear predictor
-    ## what is VinvR ???
-    eta <- lq$fits + crossprod(Vre, VinvR) # X\beta + Zb
     
-    return(list(allZero = FALSE, sigma2.k = sigma2.k, AI = AI, converged = converged, zeroFLAG = zeroFLAG, beta = lq$beta, eta = lq$eta, logLikR=lq$logLikR, logLik=lq$logLik, RSS=lq$RSS))
+    # linear predictor
+    VinvR <- crossprod(Sigma.inv, lq$residM)
+    eta <- lq$fits + crossprod(Vre, VinvR) # X\beta + Zb   
+    
+    return(list(allZero = FALSE, varComp = sigma2.k, AI = AI, converged = converged, zeroFLAG = zeroFLAG, beta = lq$beta, eta = eta, logLikR=lq$logLikR, logLik=lq$logLik, RSS=lq$RSS))
 
 }
 
