@@ -49,7 +49,6 @@
         AI <- matrix(NA, nrow =  g, ncol = g)
         score <- rep(NA, g)
         
-        PAPY <- crossprod(P, PY)
         for (i in 1:g) {
             PIPY <- crossprod(P[group.idx[[i]], ], PY[group.idx[[i]]]) 
             score[ i] <- -0.5 * (sum(diag(P)[group.idx[[i]]]) - crossprod(PY[group.idx[[i]]]))
