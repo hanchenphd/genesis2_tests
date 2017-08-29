@@ -3,7 +3,7 @@ require(GENESIS)
 require(GWASTools)
 
 test_that("logistic", {
-### Checks for the linear regression case:
+### Checks for the logistic regression case:
 ##### successful! 
 n <- 100
 X <- cbind(1, rnorm(n), rbinom(n, size = 1, prob = 0.5))
