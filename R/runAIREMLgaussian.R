@@ -23,26 +23,10 @@
         zeroFLAG <- sigma2.k < AIREML.tol # which elements have converged to "0"
         sigma2.k[zeroFLAG] <- 0 # set these to 0
         
-        # phenotype covariance matrix
-        Vre <- Reduce("+", mapply("*", covMatList, sigma2.k[1:m], SIMPLIFY=FALSE))
-        
-        V <- Vre
-        if(g == 1){
-            diag(V) <- diag(V) + sigma2.k[m+1]
-        }else{
-            diagV <- rep(0,n)
-            for(i in 1:g){
-                diagV[group.idx[[i]]] <- sigma2.k[m+i]
-            }
-            diag(V) <- diag(V) + diagV
-        }
-        
-        # cholesky decomposition
-        cholSigma <- chol(V)
-        # inverse
-        Sigma.inv <- chol2inv(cholSigma)
-        
-        lq <- .calcLikelihoodQuantities(Y, X, n, k, Sigma.inv, diag(cholSigma))
+        ## replace with:
+        sq <- .computeSigmaQuantities(varComp = sigma2.k, covMatList = covMatList, group.idx = group.idx)
+                
+        lq <- .calcLikelihoodQuantities(Y, X, n, k, sq$Sigma.inv, diag(sq$cholSigma))
 
         
         # print current estimates
@@ -141,9 +125,9 @@
     })
     
     # linear predictor
-    eta <- lq$fits + crossprod(Vre, lq$Sigma.inv_R) # X\beta + Zb
+    eta <- lq$fits + crossprod(sq$Vre, lq$Sigma.inv_R) # X\beta + Zb
     
-    return(list(varComp = sigma2.k, AI = AI, converged = converged, zeroFLAG = zeroFLAG, beta=lq$beta, eta=eta, logLikR=lq$logLikR, logLik=lq$logLik, RSS=lq$RSS))
+    return(list(varComp = sigma2.k, AI = AI, converged = converged, zeroFLAG = zeroFLAG, beta=lq$beta, residM = lq$residM, eta=eta, logLikR=lq$logLikR, logLik=lq$logLik, RSS=lq$RSS))
     
 }
 

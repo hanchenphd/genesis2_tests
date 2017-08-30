@@ -21,16 +21,8 @@
         
         if (sum(zeroFLAG) == m)  return(list(allZero = TRUE))
         
-        # variance matrix
-        Vre <- Reduce("+", mapply("*", covMatList, sigma2.k[1:m], SIMPLIFY=FALSE))
-        V <- Vre + diag(as.vector(vmu)/as.vector(gmuinv)^2)
-
-        # cholesky decomposition
-        cholSigma <- chol(V)
-        # inverse
-        Sigma.inv <- chol2inv(cholSigma)
-        
-        lq <- .calcLikelihoodQuantities(Y, X, n, k, Sigma.inv, diag(cholSigma))
+        sq <- .computeSigmaQuantities(varComp = sigma2.k, covMatList = covMatList, vmu = vmu, gmuinv = gmuinv )     
+        lq <- .calcLikelihoodQuantities(Y, X, n, k, sq$Sigma.inv, diag(sq$cholSigma))
 
         
         # print current estimates
@@ -99,10 +91,10 @@
     
     
     # linear predictor
-    VinvR <- crossprod(Sigma.inv, lq$residM)
-    eta <- lq$fits + crossprod(Vre, VinvR) # X\beta + Zb   
+    VinvR <- crossprod(sq$Sigma.inv, lq$residM)
+    eta <- lq$fits + crossprod(sq$Vre, VinvR) # X\beta + Zb   
     
-    return(list(allZero = FALSE, varComp = sigma2.k, AI = AI, converged = converged, zeroFLAG = zeroFLAG, beta = lq$beta, eta = eta, logLikR=lq$logLikR, logLik=lq$logLik, RSS=lq$RSS))
+    return(list(allZero = FALSE, varComp = sigma2.k, AI = AI, converged = converged, zeroFLAG = zeroFLAG, beta = lq$beta,  residM = lq$residM,  eta = eta, logLikR=lq$logLikR, logLik=lq$logLik, RSS=lq$RSS))
 
 }
 
