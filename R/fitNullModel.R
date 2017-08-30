@@ -19,7 +19,7 @@
 #'
 #' @importFrom stats glm lm
 #' @export
-fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "gaussian", 
+fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "gaussian", start = NULL,
                          AIREML.tol = 1e-6, maxIter = 100, dropZeros = TRUE, verbose = TRUE){
     
     if(!is.null(covMatList)){
@@ -53,12 +53,14 @@ fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "ga
             out <- .nullModOutReg(y, X, mod, family)
         }
         if (is.null(covMatList) & !is.null(group.idx)){
-            vc.mod <- .runWLSgaussian(y, X, group.idx = group.idx, start = NULL, 
+            vc.mod <- .runWLSgaussian(y, X, group.idx = group.idx, start = start, 
                                       AIREML.tol = AIREML.tol,   maxIter = maxIter,  verbose = verbose)
             out <- .nullModOutWLS(y, X, vc.mod = vc.mod, family =  family, group.idx = group.idx)
         }
         if (!is.null(covMatList)){
-            vc.mod <- .runAIREMLgaussian(y, X, start = NULL, covMatList, group.idx, AIREML.tol, dropZeros,  maxIter,  verbose)
+            vc.mod <- .runAIREMLgaussian(y, X, start = start, covMatList = covMatList, 
+            			group.idx = group.idx, AIREML.tol = AIREML.tol, dropZeros = dropZeros,  
+            			maxIter = maxIter,  verbose = verbose)
             out <- .nullModOutMM(y = y, workingY = y,  X = X, vc.mod = vc.mod, 
             					family = family, covMatList = covMatList, 
                                  group.idx = group.idx, dropZeros = dropZeros)
@@ -69,44 +71,15 @@ fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "ga
 	
         
         if (!is.null(covMatList)){ ## iterate between computing workingY and estimating VCs. 
-            eta <- mod$linear.predictors
-            working.y <- .calcWorkingYnonGaussian(y, eta, family)
-            newstart <- NULL
-            Yreps <- 0
-            repeat({
-                Yreps <- Yreps + 1
-                if(verbose) message("Computing Variance Component Estimates...")
-                if(verbose) message(paste(paste("Sigma^2_",c(names(covMatList)),sep="", collapse="     "), "log-lik", "RSS", sep="     "))
-                
-                # estimate variance components
-                vc.mod <- .runAIREMLother(Y=working.y$Y, X=X, start=newstart, covMatList=covMatList, 
-                                       AIREML.tol=AIREML.tol, dropZeros=dropZeros, maxIter=maxIter, 
-                                       verbose=verbose, vmu=working.y$vmu, gmuinv=working.y$gmuinv)
-                
-                if (vc.mod$allZero == TRUE) {
-                    message("All variance components estimated as zero, using glm...")
-                    break()
-                }
-                # update parameters
-                if(verbose) message("Updating WorkingY Vector...")
-                working.y <- .calcWorkingYnonGaussian(y, vc.mod$eta, family)
-                
-                # current variance component estimate
-                newstart <- vc.mod$varComp
-                newstart[vc.mod$zeroFLAG] <- AIREML.tol
-                
-                # test for convergence
-                stat <- sqrt(sum((vc.mod$eta - eta)^2))
-                if(verbose) message(paste("Checking for Convergence...", stat, sep = "\t"))
-                eta <- vc.mod$eta
-                if(stat < AIREML.tol){ break() }
-                if(Yreps == maxIter){
-                    vc.mod$converged <- FALSE
-                    warning("Maximum number of iterations for workingY reached without convergence!")
-                    break()
-                }
-            })
-	    ## check whether all variance components were estimated as zero:
+            
+            iterate.out <- .iterateAIREMLworkingY(glm.mod = mod, X = X, family = family, 
+            				start = start, covMatList = covMatList, AIREML.tol = AIREML.tol,
+							dropZeros = dropZeros, maxIter = maxIter, verbose = verbose)
+           
+           vc.mod <- iterate.out$vc.mod
+           working.y <- iterate.out$working.y
+      	   
+      	    ## check whether all variance components were estimated as zero:
             if (vc.mod$allZero == TRUE){
                 out <- .nullModOutReg(y, X, mod, family)
             } else{
@@ -148,3 +121,54 @@ fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "ga
 
     return(list(Y=Y, vmu=vmu, gmuinv=gmuinv))
 }
+
+
+
+
+.iterateAIREMLworkingY <- function(glm.mod, X, family, start = NULL, covMatList, AIREML.tol = 1e-6,
+						 dropZeros = TRUE, maxIter = 100, verbose = TRUE){
+	y <- glm.mod$y
+	eta <- glm.mod$linear.predictors
+	working.y <- .calcWorkingYnonGaussian(y, eta, family)
+	newstart <- start
+	Yreps <- 0
+	
+	repeat({
+		Yreps <- Yreps + 1
+		if(verbose) message("Computing Variance Component Estimates...")
+		if(verbose) message(paste(paste("Sigma^2_",c(names(covMatList)),sep="", collapse="     "), "log-lik", "RSS", sep="     "))
+                
+		# estimate variance components
+		vc.mod <- .runAIREMLother(Y=working.y$Y, X=X, start=newstart, covMatList=covMatList, 
+									AIREML.tol=AIREML.tol, dropZeros=dropZeros, maxIter=maxIter, 
+									verbose=verbose, vmu=working.y$vmu, gmuinv=working.y$gmuinv)
+                
+		if (vc.mod$allZero == TRUE) {
+			message("All variance components estimated as zero, using glm...")
+			break()
+		}
+		# update parameters
+		if(verbose) message("Updating WorkingY Vector...")
+		working.y <- .calcWorkingYnonGaussian(y, vc.mod$eta, family)
+                
+		# current variance component estimate
+		newstart <- vc.mod$varComp
+		newstart[vc.mod$zeroFLAG] <- AIREML.tol
+                
+		# test for convergence
+		stat <- sqrt(sum((vc.mod$eta - eta)^2))
+		if(verbose) message(paste("Checking for Convergence...", stat, sep = "\t"))
+		eta <- vc.mod$eta
+		if(stat < AIREML.tol){ break() }
+		
+		if(Yreps == maxIter){
+			vc.mod$converged <- FALSE
+			warning("Maximum number of iterations for workingY reached without convergence!")
+			break()
+		}
+	})
+
+	return(list(vc.mod = vc.mod, working.y = working.y))
+	
+}
+
