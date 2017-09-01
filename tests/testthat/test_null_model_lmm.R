@@ -62,4 +62,16 @@ expect_true(all(nullmod$zeroFLAG == lmm.genesis$zeroFLAG))
 expect_true(all(abs(nullmod$cholSigmaInv - lmm.genesis$cholSigmaInv) < 1e-9))
 expect_true(all(abs(nullmod$RSS - lmm.genesis$RSS) < 1e-9))
 
+
+### test updating a conditional model: 
+G = matrix(rnorm(100, 100,1))
+nullmod2 <- updateNullModCond(nullmod, G, updateVarComp = TRUE, covMatList = list(cor.mat), group.idx = group.idx, AIREML.tol = 1e-7)
+nullmod3 <- fitNullModel(y, cbind(X, G), group.idx = group.idx, cor.mat, AIREML.tol = 1e-7)
+
+expect_true(max(abs(nullmod2$varComp - nullmod3$varComp)) < 1e-6)
+expect_true(max(abs(nullmod3$fixef - nullmod2$fixef)) < 1e-5)
+expect_true(all(abs(nullmod2$cholSigmaInv - nullmod3$cholSigmaInv) < 1e-5))
+expect_true(all(abs(nullmod2$varCompCov - nullmod3$varCompCov) < 1e-5))
+
+
 })
