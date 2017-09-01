@@ -45,7 +45,7 @@
 
 ### updated later for using sparsity...
 #' @importFrom stats pchisq
-.nullModOutWLS <- function(y, X, vc.mod, family, group.idx, use.sparsity = FALSE){
+.nullModOutWLS <- function(y, X, vc.mod, family, group.idx){
     family$mixedmodel <- FALSE
     
     if (is.null(names(group.idx))){
@@ -61,14 +61,15 @@
     
     hetResid <- TRUE
     varNames <- colnames(X) 
-    cholSigmaInv <- diag(sqrt(diag(vc.mod$Sigma.inv)))
+    cholSigmaInv.diag <- sqrt(vc.mod$Sigma.inv.diag)
     
     ### in future version, using Matrix package, we will have: 
     ### cholSigmaInv <- Diagonal(sqrt(diag(vc.mod$Sigma.inv)))
     
     RSS <- vc.mod$RSS
-    
-    betaCov <- RSS * chol2inv(chol(crossprod(crossprod(cholSigmaInv, X))))
+   
+    betaCov <- RSS * chol2inv(chol(crossprod(X*cholSigmaInv.diag)))  
+    # betaCov <- RSS * chol2inv(chol(crossprod(crossprod(cholSigmaInv, X))))
     dimnames(betaCov) <- list(varNames, varNames)
     
     SE <- sqrt(diag(betaCov))
@@ -102,7 +103,7 @@
                 fixef = fixef, betaCov = betaCov, fitted.values = fitted.values, 
                 resid.marginal = resid.marginal, resid.conditional = resid.conditional, 
                 logLik = logLik, logLikR  = logLikR, AIC = AIC, workingY = workingY, 
-                outcome = outcome, model.matrix = model.matrix, cholSigmaInv = cholSigmaInv, 
+                outcome = outcome, model.matrix = model.matrix, cholSigmaInv = cholSigmaInv.diag, 
                 converged = converged,  zeroFLAG =zeroFLAG, RSS = RSS ))
 }
 
