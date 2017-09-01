@@ -43,12 +43,8 @@
         ## just the diagonal - squared root of diagonals, and inverse of diagonals of Sigma.
         cholSigma.diag <- sqrt(diagSigma)
         Sigma.inv.diag <- 1/diagSigma
-        
-        cholSigma <- diag(cholSigma.diag)
-        Sigma.inv <- diag(Sigma.inv.diag )
-
-
-        lq <- .calcLikelihoodQuantities(Y, X, n, k, Sigma.inv, cholSigma.diag)
+    
+        lq <- .calcLikelihoodQuantities(Y, X, n, k, diag(Sigma.inv.diag), cholSigma.diag)
 
         
         
@@ -100,17 +96,14 @@
 	cholSigma.diag <- sqrt(diagSigma)
 	Sigma.inv.diag <- 1/diagSigma
         
-	cholSigma <- diag(cholSigma.diag)
-	Sigma.inv <- diag(Sigma.inv.diag )
-
-	lq <- .calcLikelihoodQuantities(Y, X, n, k, Sigma.inv, cholSigma.diag)
+	lq <- .calcLikelihoodQuantities(Y, X, n, k, diag(Sigma.inv.diag), diag(cholSigma.diag))
 	score.AI <- .calcAIhetvars(lq$P, lq$PY, group.idx)
 	AI       <- score.AI$AI
 
 
     eta <- lq$fits
     return(list(varComp = sigma2.k, AI = AI, converged = converged,
-                Sigma.inv = Sigma.inv, beta = lq$beta, 
+                Sigma.inv.diag = Sigma.inv.diag, beta = lq$beta, 
                 residM = lq$residM, fits = lq$fits, eta = eta, logLikR = lq$logLikR,
                 logLik = lq$logLik, RSS = lq$RSS))
 }
