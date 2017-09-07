@@ -4,7 +4,10 @@
 ## using the likelihood ration test. 
 testSingleVarianceComponent <- function(nullmod, varCompName, covMatList, group.idx = NULL, AIREML.tol = 1e-6, maxIter = 100, dropZeros = TRUE, verbose = TRUE){
 	
+	if (nullmod$hetResid & is.null(group.idx)) stop("missing group indices group.idx")
+	
 	ind.test <- match(varCompName, names(covMatList))
+	
 	
 	if (length(covMatList) == 1){
 		nullmod.noVarComp <- fitNullModel(nullmod$outcome, X = nullmod$model.matrix, covMatList = NULL, 
