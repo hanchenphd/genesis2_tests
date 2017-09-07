@@ -3,36 +3,47 @@
 
 ## the names of items in the list group.idx have to match the names of the corresponding variance components!
 
-updateNullModOutcome <- function(nullmod, covMatList = NULL, group.idx = NULL, rankNorm.option = c("by.group", "all"), rescale = TRUE, AIREML.tol = 1e-6, maxIter = 100, verbose = TRUE){
+updateNullModOutcome <- function(nullmod, covMatList = NULL, group.idx = NULL, rankNorm.option = c("by.group", "all"), rescale = c("None", "model", "residSD"), AIREML.tol = 1e-6, maxIter = 100, verbose = TRUE){
+   
+   if (nullmod$family$family != "gaussian") stop("Family must be gaussian")
     
    resid <- nullmod$resid.marginal
-   if (!is.null(group.idx)) g <- length(group.idx)
+   if (!is.null(group.idx)) {
+   		g <- length(group.idx)
+   		} else {
+   			g <- 1
+   			}
    if (!is.null(covMatList)) m <- length(covMatList)
    
    ## checks that may be put into wrapper:
-   if (rescale & is.null(group.idx)) stop("Rescaling is only done by groups, and group indices are missing.") 
-    
+   if ((rescale != "None") & is.null(group.idx)) stop("Rescaling is only done by groups, and group indices are missing.") 
+   
    if (rankNorm.option == "by.group" & is.null(group.idx)) stop("Cannot rank normalize by group, missing group indices.")
+   
+   
+   if (rescale == "None"){
+	   	group.vars <- rep(1, g)
+   } else{
+		group.vars <- rep(NA, g)
+		for (i in 1:g){
+			if (rescale == "model") group.vars[i] <- .averageGroupVar(nullmod$varComp, covMatList, group.idx[i])
+			if (rescale == "residSD") group.vars[i] <- var(resid[group.idx[[i]]])
+		}
+   }
+     
+   
    if (rankNorm.option == "by.group"){
    		for (i in 1:g){
    			group.resids <- rankNorm(resid[group.idx[[i]]])
-   			if (rescale){
-   				group.var <- .averageGroupVar(nullmod$varComp, covMatList, group.idx[i])
-   			} else{
-   				group.var <- 1
-   			}
-   			resid[group.idx[[i]]] <- group.resids*sqrt(group.var)
+   			resid[group.idx[[i]]] <- group.resids*sqrt(group.vars[i])
    			
    		}
    }
    
    if (rankNorm.option == "all"){
-   		resid <- rankNorm(resid)
-   		if (rescale) { 
-   			for (i in 1:g){
-	   			group.var <- .averageGroupVar(nullmod$varComp, covMatList, group.idx[i])
-   				resid[group.idx[[i]]] <- resid[group.idx[[i]]]*sqrt(group.var)
-   			}
+   		resid <- rankNorm(resid) 
+   		for (i in 1:g){
+   			resid[group.idx[[i]]] <- resid[group.idx[[i]]]*sqrt(group.vars[i])/sd(resid[group.idx[[i]]])
    		}    		
    } 
    
@@ -58,6 +69,9 @@ updateNullModOutcome <- function(nullmod, covMatList = NULL, group.idx = NULL, r
 	if (is.null(group.idx)){
 		stop("group indices are not provided, cannot calculate average variance in the group")
 	} 
+	 
+	if (!is.list(group.idx)) stop("group.idx should be a list with one entry")
+	if (length(group.idx) > 1) stop("group.idx should be a list with one entry")
 		
 	if (is.null(covMatList)) {
 		m <- 0	
