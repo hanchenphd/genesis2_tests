@@ -19,7 +19,7 @@ testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald"), GxE.
 	
 	CW <- nullprep$CW
 	Mt <- nullprep$Mt
-	Ytilde <- nullprep$Ytilte
+	Ytilde <- nullprep$Ytilde
 	sY2 <- nullprep$sY2
 	k <- nullprep$k
 	
