@@ -3,12 +3,24 @@
 ## idx.exclude are indices of individuals that should be excluded (e.g. because of missing genotypes)
 
 nullModelTestPrep <- function(nullmod, idx.exclude = NULL){
-	Y <- ifelse(is.null(idx.exclude), nullmod$workingY , nullmod$workingY[-idx.exclude]) 
-	W <- ifelse(is.null(idx.exclude), nullmod$model.matrix , nullmod$model.matrix[-idx.exclude,])
+	
+	if (is.null(idx.exclude)){
+		Y <- nullmod$workingY
+		W <- nullmod$model.matrix
+	} else{
+		Y <- nullmod$workingY[-idx.exclude]
+		W <- nullmod$model.matrix[-idx.exclude,]
+	}
+	
+	
 	n <- length(Y)
 	
 	if (nullmod$family$mixedmodel){  ## n by n cholSigmaInv
-		C <- ifelse(is.null(idx.exclude), nullmod$cholSigmaInv , subsetCholSigmaInv(nullmod$cholSigmaInv, idx.exclude))
+		if (is.null(idx.exclude)){
+			C <- nullmod$cholSigmaInv
+		} else{
+			C <- subsetCholSigmaInv(nullmod$cholSigmaInv, idx.exclude)
+			}
 		CW <- crossprod(C, W)	
 		Mt <- C - tcrossprod(tcrossprod(C, tcrossprod(chol2inv(chol(crossprod(CW))), CW)), CW)
 	}
