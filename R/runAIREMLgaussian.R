@@ -127,7 +127,7 @@
     # linear predictor
     eta <- lq$fits + crossprod(sq$Vre, lq$Sigma.inv_R) # X\beta + Zb
     
-    return(list(varComp = sigma2.k, AI = AI, converged = converged, zeroFLAG = zeroFLAG, beta=lq$beta, residM = lq$residM, eta=eta, logLikR=lq$logLikR, logLik=lq$logLik, RSS=lq$RSS))
+    return(list(varComp = sigma2.k, AI = AI, converged = converged, zeroFLAG = zeroFLAG, beta=lq$beta, residM = lq$residM, eta=eta, logLikR=lq$logLikR, logLik=lq$logLik, RSS=lq$RSS, fits = lq$fits))
     
 }
 
