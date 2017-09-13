@@ -16,7 +16,7 @@
 	
 	Sigma <- Vre <- Reduce("+", mapply("*", covMatList, varComp[1:m], SIMPLIFY=FALSE))
     if(g > 0){
-        diagV <- rep(0,n)
+        diagV <- rep(0,nrow(covMatList[[1]]))
         for(i in 1:g){
             diagV[group.idx[[i]]] <- varComp[m+i]
         }
