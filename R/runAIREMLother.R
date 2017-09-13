@@ -94,7 +94,7 @@
     VinvR <- crossprod(sq$Sigma.inv, lq$residM)
     eta <- lq$fits + crossprod(sq$Vre, VinvR) # X\beta + Zb   
     
-    return(list(allZero = FALSE, varComp = sigma2.k, AI = AI, converged = converged, zeroFLAG = zeroFLAG, beta = lq$beta,  residM = lq$residM,  eta = eta, logLikR=lq$logLikR, logLik=lq$logLik, RSS=lq$RSS))
+    return(list(allZero = FALSE, varComp = sigma2.k, AI = AI, converged = converged, zeroFLAG = zeroFLAG, beta = lq$beta,  residM = lq$residM,  eta = eta, logLikR=lq$logLikR, logLik=lq$logLik, RSS=lq$RSS, fits = lq$fits))
 
 }
 
