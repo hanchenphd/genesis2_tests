@@ -95,8 +95,5 @@ updateNullModOutcome <- function(nullmod, covMatList = NULL, group.idx = NULL, r
 
 
 
-#' Inverse normal transform
-#'
-#' @param x Vector of values to transform
-#' @return Vector with transformed values of \code{x}
+## Inverse normal transform
 .rankNorm <- function(x) qnorm((rank(x) - 0.5)/length(x))
