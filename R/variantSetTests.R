@@ -1,4 +1,10 @@
 
+## function that gets an n\times p matrix of p genotypes of n individuals, and a null model, and tests the genotypes associations with the outcomes. 
+## Genetic data are always assumed complete. 
+## Types of tests: 
+## Variant set: SKAT, burden, SKAT-O. Multiple types of p-values. Default: Davis with Koenen if does not converge. 
+
+
 testVariantSet <- function(nullprep, G, weights, test = c("SKAT", "Burden"), 
 							burden.test = c("Score", "Wald"),  rho = 0, pval.method = "davies", 
 							return.scores = FALSE, return.scores.cov = FALSE){

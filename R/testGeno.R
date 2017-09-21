@@ -1,41 +1,29 @@
 
 ## function that gets an n\times p matrix of p genotypes of n individuals, and a null model, and tests the genotypes associations with the outcomes. 
 ## Genetic data are always assumed complete. 
-## this function will call other functions, depends on the type of test. Exact functions to be determined later. 
 ## Types of tests: 
 ## Single variant: Wald, score, BinomiRare, interaction. 
 ## Variant set: SKAT, burden, SKAT-O. Multiple types of p-values. Default: Davis with Koenen if does not converge. 
 
-
-testGeno <- function(nullprep, G, weights, ...){
-	
-	
-}
 
 # E an environmntal variable for optional GxE interaction analysis. 
 # the maf variable (could be replaced, or constructed to be used in another way) is only for
 # settings the NA the results for variants with maf=0.
 testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald"), GxE.return.cov = FALSE){
 	
-	CW <- nullprep$CW
-	Mt <- nullprep$Mt
-	Ytilde <- nullprep$Ytilde
-	sY2 <- nullprep$sY2
-	k <- nullprep$k
-	
-	n <- length(Ytilde)
+	n <- length(nullprep$Ytilde)
 	p <- ncol(G)
 	
 	if (test == "Wald" & is.null(E)){
-		res <- .testGenoSingleVarWald(Mt, G,  Ytilde, sY2, n, k, maf)
+		res <- .testGenoSingleVarWald(nullprep$Mt, G, nullprep$Ytilde, nullprep$sY2, n,  nullprep$k, maf)
 	}
 	
 	if (test == "Wald" & !is.null(E)){
-		res <- .testGenoSingleVarWaldGxE(Mt, G, E, Ytilde, sY2, n, k, maf)
+		res <- .testGenoSingleVarWaldGxE(nullprep$Mt, G, E, nullprep$Ytilde,  nullprep$sY2, n, nullprep$ k, maf)
 	}
 	
 	if (test == "Score"){
-		res <- .testGenoSingleVarScore(Mt, G, Ytilde, maf)
+		res <- .testGenoSingleVarScore(nullprep$Mt, G, nullprep$Ytilde, maf)
 	}
 
 	return(res)
