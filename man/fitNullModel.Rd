@@ -5,19 +5,21 @@
 \title{Fit null model}
 \usage{
 fitNullModel(y, X, covMatList = NULL, group.idx = NULL,
-  family = "gaussian", AIREML.tol = 1e-06, maxIter = 100,
+  family = "gaussian", start = NULL, AIREML.tol = 1e-06, maxIter = 100,
   dropZeros = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{y}{outcome vector}
 
-\item{X}{model.matrix}
+\item{X}{data.frame or model.matrix}
 
 \item{covMatList}{A list of matrices specifying the covariance structures of the random effects terms}
 
 \item{group.idx}{list of indices for each group level}
 
 \item{family}{A description of the error distribution to be used in the model. The default "gaussian" fits a linear mixed model; see \code{\link{family}} for further options.}
+
+\item{start}{A vector of starting values for the variance component estimation procedure. The function will pick reasonable starting values when left NULL (default). See 'Details' for more information.}
 
 \item{AIREML.tol}{The convergence threshold for the Average Information REML (AIREML) procedure used to estimate the variance components of the random effects.}
 

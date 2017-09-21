@@ -5,10 +5,10 @@ updateNullModCond <- function(nullmod, G, covMatList = NULL, group.idx = NULL, A
     ## a few checks that may be transfered to wrapper function: 
     if (nullmod$hetResid & is.null(group.idx)) stop("group indices are required for updating the null model")
 
-    if (updateVarComp){ ## this check may be pulled out for wrapper function.
+    #if (updateVarComp){ ## this check may be pulled out for wrapper function.
     	if (is.null(covMatList)) stop("covMatList is needed for udpating variance components")
     	if (nullmod$hetResid & is.null(group.idx)) stop("group indices are required for updating variance components")
-    }
+    #}
 
     
     X = cbind(nullmod$model.matrix, G)

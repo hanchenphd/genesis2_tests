@@ -11,14 +11,12 @@
 #' @param covMatList A list of matrices specifying the covariance structures of the random effects terms
 #' @param group.idx list of indices for each group level
 #' @param family A description of the error distribution to be used in the model. The default "gaussian" fits a linear mixed model; see \code{\link{family}} for further options.
+#' @param start A vector of starting values for the variance component estimation procedure. The function will pick reasonable starting values when left NULL (default). See 'Details' for more information.
 #' @param AIREML.tol The convergence threshold for the Average Information REML (AIREML) procedure used to estimate the variance components of the random effects.
 #' @param maxIter The maximum number of iterations allowed in the AIREML procedure
 #' @param dropZeros Logical indicator of whether variance component terms that converge to 0 should be removed from the model
 #' @param verbose Logical indicator of whether updates from the function should be printed to the console
 #' @return The null model (TODO fill in details)
-#'
-#' @importFrom stats glm lm
-#' @export
 fitNullModel <- function(y, X, covMatList = NULL, group.idx = NULL, family = "gaussian", start = NULL,
                          AIREML.tol = 1e-6, maxIter = 100, dropZeros = TRUE, verbose = TRUE){
     

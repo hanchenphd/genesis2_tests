@@ -34,14 +34,14 @@ updateNullModOutcome <- function(nullmod, covMatList = NULL, group.idx = NULL, r
    
    if (rankNorm.option == "by.group"){
    		for (i in 1:g){
-   			group.resids <- rankNorm(resid[group.idx[[i]]])
+   			group.resids <- .rankNorm(resid[group.idx[[i]]])
    			resid[group.idx[[i]]] <- group.resids*sqrt(group.vars[i])
    			
    		}
    }
    
    if (rankNorm.option == "all"){
-   		resid <- rankNorm(resid) 
+   		resid <- .rankNorm(resid) 
    		for (i in 1:g){
    			resid[group.idx[[i]]] <- resid[group.idx[[i]]]*sqrt(group.vars[i])/sd(resid[group.idx[[i]]])
    		}    		
@@ -92,3 +92,11 @@ updateNullModOutcome <- function(nullmod, covMatList = NULL, group.idx = NULL, r
 	
 	return(sum.var)
 }
+
+
+
+#' Inverse normal transform
+#'
+#' @param x Vector of values to transform
+#' @return Vector with transformed values of \code{x}
+.rankNorm <- function(x) qnorm((rank(x) - 0.5)/length(x))

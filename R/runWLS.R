@@ -2,7 +2,6 @@
 ### add heterogeneous variants - covMatList == NULL
 # n - number of people 
 # g - the number of groups (1 to more). if g == 1 group.idx is ignored. 
-#' @importFrom stats var
 .runWLSgaussian <- function (Y, X, group.idx, start, AIREML.tol,
                              maxIter,  verbose){
     n <- length(Y)

@@ -91,8 +91,10 @@ testVariantSet <- function(nullprep, G, weights, test = c("SKAT", "Burden"),
 			err <- 0
 
 		}else{
+                        if(!requireNamespace("survey")) stop("package 'survey' must be installed to calculate p-values for SKAT")
+		        if(!requireNamespace("CompQuadForm")) stop("package 'CompQuadForm' must be installed to calculate p-values for SKAT")
 			if(pval.method == "kuonen"){
-				pval <- survey:::saddle(x = Q, lambda = lambda)
+                                pval <- survey:::saddle(x = Q, lambda = lambda)
 				err <- ifelse(is.na(pval), 1, 0)
 
 			}else if(pval.method == "davies"){
