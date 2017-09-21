@@ -19,36 +19,34 @@ covMatList <- list(A = cor.mat)
 nullmod <- fitNullModel(y, X, group.idx = group.idx, covMatList, verbose=FALSE)
 
 group.ind <- 1
-expect_equal(.averageGroupVar(nullmod$varComp, covMatList = covMatList, group.idx = group.idx[group.ind]) == 
-						(nullmod$varComp[1]*mean(diag(cor.mat)[group.idx[[group.ind]]]) + nullmod$varComp[group.ind + 1]))
+expect_equal(.averageGroupVar(nullmod$varComp, covMatList = covMatList, group.idx = group.idx[group.ind]),
+             nullmod$varComp[1]*mean(diag(cor.mat)[group.idx[[group.ind]]]) + nullmod$varComp[group.ind + 1])
 
 group.ind <- 2
-expect_equal(.averageGroupVar(nullmod$varComp, covMatList = covMatList, group.idx = group.idx[group.ind]) == 
-						(nullmod$varComp[1]*mean(diag(cor.mat)[group.idx[[group.ind]]]) + nullmod$varComp[group.ind + 1]))
+expect_equal(.averageGroupVar(nullmod$varComp, covMatList = covMatList, group.idx = group.idx[group.ind]),
+	     nullmod$varComp[1]*mean(diag(cor.mat)[group.idx[[group.ind]]]) + nullmod$varComp[group.ind + 1])
 
-expect_equal(.averageGroupVar(nullmod$varComp, covMatList = NULL, group.idx = group.idx[group.ind]) == 
-						nullmod$varComp[group.ind + 1])
+expect_equal(.averageGroupVar(nullmod$varComp, covMatList = NULL, group.idx = group.idx[group.ind]),
+             nullmod$varComp[group.ind + 1])
 						
 throws_error(.averageGroupVar(nullmod$varComp, covMatList = NULL, group.idx = group.idx))
 throws_error(.averageGroupVar(nullmod$varComp, covMatList = NULL, group.idx = NULL))
 throws_error(.averageGroupVar(nullmod$varComp, covMatList = NULL, group.idx = group.idx[[1]]))
 
-nullmod2 <- updateNullModOutcome(nullmod, covMatList = covMatList, group.idx = group.idx,  rankNorm.option = c("by.group"), rescale = c("None"))
+nullmod2 <- updateNullModOutcome(nullmod, covMatList = covMatList, group.idx = group.idx,  rankNorm.option = c("by.group"), rescale = c("None"), verbose=FALSE)
 
 
 expect_true(abs(.averageGroupVar(nullmod2$varComp, covMatList = covMatList, group.idx = group.idx[1]) - 1) < 0.1 )
 expect_true(abs(.averageGroupVar(nullmod2$varComp, covMatList = covMatList, group.idx = group.idx[2]) -1) < 0.1 )
 
-
-nullmod3 <- updateNullModOutcome(nullmod, covMatList = covMatList, group.idx = group.idx,  rankNorm.option = c("by.group"), rescale = c("residSD"))
+# why are these tests not < 0.1???
+nullmod3 <- updateNullModOutcome(nullmod, covMatList = covMatList, group.idx = group.idx,  rankNorm.option = c("by.group"), rescale = c("residSD"), verbose=FALSE)
 expect_true(abs(.averageGroupVar(nullmod3$varComp, covMatList = covMatList, group.idx = group.idx[1]) - var(nullmod$resid.marginal[group.idx[[1]]] ) ) < 0.1 )
 expect_true(abs(.averageGroupVar(nullmod3$varComp, covMatList = covMatList, group.idx = group.idx[2]) - var(nullmod$resid.marginal[group.idx[[2]]] ) ) < 0.1 )
 
-nullmod4 <- updateNullModOutcome(nullmod, covMatList = covMatList, group.idx = group.idx,  rankNorm.option = c("by.group"), rescale = c("model"))
-expect_true(abs(.averageGroupVar(nullmod4$varComp, covMatList = covMatList, group.idx = group.idx[1]) -
-					 .averageGroupVar(nullmod$varComp, covMatList = covMatList, group.idx = group.idx[1]) ) < 0.1 )
-expect_true(abs(.averageGroupVar(nullmod4$varComp, covMatList = covMatList, group.idx = group.idx[2]) -
-					 .averageGroupVar(nullmod$varComp, covMatList = covMatList, group.idx = group.idx[2]) ) < 0.1 )
+nullmod4 <- updateNullModOutcome(nullmod, covMatList = covMatList, group.idx = group.idx,  rankNorm.option = c("by.group"), rescale = c("model"), verbose=FALSE)
+expect_true(abs(.averageGroupVar(nullmod4$varComp, covMatList = covMatList, group.idx = group.idx[1]) - .averageGroupVar(nullmod$varComp, covMatList = covMatList, group.idx = group.idx[1]) ) < 0.1 )
+expect_true(abs(.averageGroupVar(nullmod4$varComp, covMatList = covMatList, group.idx = group.idx[2]) - .averageGroupVar(nullmod$varComp, covMatList = covMatList, group.idx = group.idx[2]) ) < 0.1 )
 
 
 
