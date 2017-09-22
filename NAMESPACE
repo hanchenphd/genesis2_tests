@@ -1,5 +1,6 @@
 import(stats)
 
 export(fitNullModel,
+       nullModelTestPrep,
        testGenoSingleVar,
        testVariantSet)

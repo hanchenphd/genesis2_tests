@@ -43,7 +43,7 @@ nullModelTestPrep <- function(nullmod, idx.exclude = NULL){
     Ytilde <- crossprod(Mt, Y)
     sY2 <- sum(Ytilde^2)
 
-    return(list(CW = CW, Mt = Mt, Ytilde = Ytilde, sY2 = sY2, k = ncol(W), resid = nullmod$resid.marginal))
+    return(list(Mt = Mt, Ytilde = Ytilde, sY2 = sY2, k = ncol(W), resid = nullmod$resid.marginal))
 }
 
 
