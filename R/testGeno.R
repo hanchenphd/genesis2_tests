@@ -16,11 +16,11 @@ testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Scor
     p <- ncol(G)
     
     if (test == "Wald" & is.null(E)){
-        res <- .testGenoSingleVarWald(nullprep$Mt, G, nullprep$Ytilde, nullprep$sY2, n,  nullprep$k, maf)
+        res <- .testGenoSingleVarWald(nullprep$Mt, G, nullprep$Ytilde, nullprep$sY2, n, nullprep$k, maf)
     }
     
     if (test == "Wald" & !is.null(E)){
-        res <- .testGenoSingleVarWaldGxE(nullprep$Mt, G, E, nullprep$Ytilde,  nullprep$sY2, n, nullprep$ k, maf)
+        res <- .testGenoSingleVarWaldGxE(nullprep$Mt, G, E, nullprep$Ytilde, nullprep$sY2, n, nullprep$ k, maf)
     }
     
     if (test == "Score"){
@@ -28,7 +28,6 @@ testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Scor
     }
 
     return(res)
-    
 }
 
 
@@ -44,15 +43,12 @@ testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Scor
     res <- data.frame(Score = score, Score.SE = sqrt(XtX), Score.Stat = Stat, 
                       Score.pval = pchisq(Stat^2, df = 1, lower.tail = FALSE) )
     
-    return(res)				
-    
+    return(res)	
 }
 
 
 
-
-
-.testGenoSingleVarWald <- function(Mt, G, Ytilde, sY2, n, k , maf){
+.testGenoSingleVarWald <- function(Mt, G, Ytilde, sY2, n, k, maf){
     Xtilde <- crossprod(Mt, G) # adjust genotypes for correlation structure and fixed effects
     XtX <- colSums(Xtilde^2) # vector of X^T SigmaInv X (for each SNP)
     XtX[maf == 0] <- NA # filter monomorphic SNPs
@@ -63,9 +59,9 @@ testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Scor
     Stat <- beta/sqrt(Vbeta)
     res <- data.frame(Est = beta, Est.SE = sqrt(Vbeta), Wald.Stat = Stat, 
                       Wald.pval = pchisq(Stat^2, df = 1, lower.tail = FALSE))
-    return(res)				
-    
+    return(res)	
 }
+
 
 
 .testGenoSingleVarWaldGxE <- function(Mt, G, E, Ytilde, sY2, n, k, maf, GxE.return.cov.mat = FALSE){
@@ -127,9 +123,7 @@ testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Scor
     res$"Joint.pval" <- pchisq(res$"Joint.Stat", df = v, lower.tail = FALSE)
 
     return(list(res = res, GxEcovMatList  = res.Vbetas))
-    
 }
-
 
 
 

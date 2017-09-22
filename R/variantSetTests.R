@@ -1,59 +1,64 @@
 
-## function that gets an n\times p matrix of p genotypes of n individuals, and a null model, and tests the genotypes associations with the outcomes. 
+## function that gets an n \times p matrix of p genotypes of n individuals, and a null model, and tests the genotypes associations with the outcomes. 
 ## Genetic data are always assumed complete. 
 ## Types of tests: 
-## Variant set: SKAT, burden, SKAT-O. Multiple types of p-values. Default: Davis with Koenen if does not converge. 
+## Variant set: SKAT, burden, SKAT-O. Multiple types of p-values. Default: Davies with Kuonen if does not converge. 
 
 
-testVariantSet <- function(nullprep, G, weights, test = c("SKAT", "Burden"), 
-                           burden.test = c("Score", "Wald"),  rho = 0, pval.method = "davies", 
+testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"), 
+                           burden.test = c("Score", "Wald"),  rho = 0,
+                           pval.method = c("davies", "kuonen", "liu"), 
                            return.scores = FALSE, return.scores.cov = FALSE){
 
-    if(!is.element(test, c("SKAT", "Burden"))) stop("Only SKAT and Burden tests are implemented for testing variant sets")
+    test <- match.arg(test)
+    burden.test <- match.arg(burden.test)
+    pval.method <- match.arg(pval.method)
     
-    if (test == "SKAT") return(.testVariantSetSKAT(nullprep, G, weights, rho, pval.method, 
-                                                   return.scores, return.scores.cov))
-    
-    if (test == "Burden") return(.testVariantSetBurden(nullprep, G, weights, burden.test))
+    if (test == "SKAT") {
+        .testVariantSetSKAT(nullprep, G, weights, rho, pval.method, 
+                            return.scores, return.scores.cov)
+    }    
+    if (test == "Burden") {
+        .testVariantSetBurden(nullprep, G, weights, burden.test)
+    }
     
 }
 
 
 
-.testVariantSetSKAT <- function(nullprep, G, weights,  rho = 0,  pval.method = "davies", 
+## create the burden score, than calls the appropriate single variant test function. 
+## can easily implement GxE interaction with the burden score... later!
+.testVariantSetBurden <- function(nullprep, G, weights, burden.test){
+    
+    burden <- colSums(t(G) * weights)
+    ## use an arbitrary value for maf, just so result isn't set to NA. 	
+    if (burden.test == "Score") {
+        .testGenoSingleVarScore(nullprep$Mt, G = matrix(burden), Ytilde = nullprep$Ytilde, maf = 1) 
+    }
+    if (burden.test == "Wald"){
+        .testGenoSingleVarWald(nullprep$Mt, G = matrix(burden), Ytilde = nullprep$Ytilde, sY2 = nullprep$sY2, 
+                               n = length(nullprep$Ytilde), k = nullprep$k, maf = 1)
+    }
+}
+
+
+
+.testVariantSetSKAT <- function(nullprep, G, weights, rho = 0, pval.method, 
                                 return.scores = FALSE, return.scores.cov = FALSE){
     
     U <- as.vector(crossprod(G, nullprep$resid))
     G <- crossprod(nullprep$Mt, G)
     if (length(rho) == 1) {
-        testout <- .runSKATTest(scores = U, geno.adj = G,
-                                weights = weights, rho = rho, pval.method = pval.method,
-                                optimal = FALSE)
+        .runSKATTest(scores = U, geno.adj = G,
+                     weights = weights, rho = rho, pval.method = pval.method,
+                     optimal = FALSE)
     } else {
-        testout <- .runSKATTest(scores = U, geno.adj = G,
-                                weights = weights, rho = rho, pval.method = pval.method,
-                                optimal = TRUE)
+        ## SKAT-O
+        .runSKATTest(scores = U, geno.adj = G,
+                     weights = weights, rho = rho, pval.method = pval.method,
+                     optimal = TRUE)
     }
-    return(testout)
 }
-
-
-## create the burden score, than calls the appropriate single variant test function. 
-## can easily implement GxE interaction with the burden score... later!
-.testVariantSetBurden <- function(nullprep, G, weights, burden.test = c("Score", "Wald")){
-    
-    burden <- colSums(t(G) * weights)
-    if (burden.test == "Score") {
-        out <- .testGenoSingleVarScore(nullprep$Mt, G = matrix(burden), nullprep$Ytilde, maf = 1 ) ## just an arbitrary value for maf, just so results isn't set to NA. 	
-    }
-    if (burden.test == "Wald"){
-        out <- .testGenoSingleVarWald(nullprep$Mt, G = matrix(burden), nullprep$Ytilde, sY2 = nullprep$sY2, 
-                                      n = length(nullprep$Ytile),k = nullprep$k ,maf = 1 ) ## just an arbitrary value for maf, just so results isn't set to NA. 	
-    }
-    
-    return(out)
-}
-
 
 
 
