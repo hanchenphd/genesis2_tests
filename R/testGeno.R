@@ -9,7 +9,8 @@
 # E an environmntal variable for optional GxE interaction analysis. 
 # the maf variable (could be replaced, or constructed to be used in another way) is only for
 # settings the NA the results for variants with maf=0.
-testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald"), GxE.return.cov = FALSE){
+testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Score"), GxE.return.cov = FALSE){
+        test <- match.arg(test)
 	
 	n <- length(nullprep$Ytilde)
 	p <- ncol(G)
