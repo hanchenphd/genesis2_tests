@@ -7,24 +7,22 @@
 
 
 # E an environmntal variable for optional GxE interaction analysis. 
-# the maf variable (could be replaced, or constructed to be used in another way) is only for
-# settings the NA the results for variants with maf=0.
-testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Score"), GxE.return.cov = FALSE){
+testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), GxE.return.cov = FALSE){
     test <- match.arg(test)
     
     n <- length(nullprep$Ytilde)
     p <- ncol(G)
     
     if (test == "Wald" & is.null(E)){
-        res <- .testGenoSingleVarWald(nullprep$Mt, G, nullprep$Ytilde, nullprep$sY2, n, nullprep$k, maf)
+        res <- .testGenoSingleVarWald(nullprep$Mt, G, nullprep$Ytilde, nullprep$sY2, n, nullprep$k)
     }
     
     if (test == "Wald" & !is.null(E)){
-        res <- .testGenoSingleVarWaldGxE(nullprep$Mt, G, E, nullprep$Ytilde, nullprep$sY2, n, nullprep$ k, maf)
+        res <- .testGenoSingleVarWaldGxE(nullprep$Mt, G, E, nullprep$Ytilde, nullprep$sY2, n, nullprep$ k)
     }
     
     if (test == "Score"){
-        res <- .testGenoSingleVarScore(nullprep$Mt, G, nullprep$Ytilde, maf)
+        res <- .testGenoSingleVarScore(nullprep$Mt, G, nullprep$Ytilde)
     }
 
     return(res)
@@ -32,12 +30,10 @@ testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Scor
 
 
 
-.testGenoSingleVarScore <- function(Mt, G, Ytilde, maf){
+.testGenoSingleVarScore <- function(Mt, G, Ytilde){
     Xtilde <- crossprod(Mt, G) # adjust genotypes for correlation structure and fixed effects
     XtX <- colSums(Xtilde^2) # vector of X^T P X (for each SNP) b/c (M^T M) = P
-    XtX[maf == 0] <- NA # filter monomorphic SNPs
     score <- as.vector(crossprod(Xtilde, Ytilde)) # X^T P Y
-    score[maf == 0] <- NA
     Stat <- score/sqrt(XtX)
     
     res <- data.frame(Score = score, Score.SE = sqrt(XtX), Score.Stat = Stat, 
@@ -48,10 +44,9 @@ testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Scor
 
 
 
-.testGenoSingleVarWald <- function(Mt, G, Ytilde, sY2, n, k, maf){
+.testGenoSingleVarWald <- function(Mt, G, Ytilde, sY2, n, k){
     Xtilde <- crossprod(Mt, G) # adjust genotypes for correlation structure and fixed effects
     XtX <- colSums(Xtilde^2) # vector of X^T SigmaInv X (for each SNP)
-    XtX[maf == 0] <- NA # filter monomorphic SNPs
     XtY <- as.vector(crossprod(Xtilde, Ytilde))
     beta <- XtY/XtX
     RSS <- as.numeric((sY2 - XtY * beta)/(n - k - 1))
@@ -64,7 +59,7 @@ testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Scor
 
 
 
-.testGenoSingleVarWaldGxE <- function(Mt, G, E, Ytilde, sY2, n, k, maf, GxE.return.cov.mat = FALSE){
+.testGenoSingleVarWaldGxE <- function(Mt, G, E, Ytilde, sY2, n, k, GxE.return.cov.mat = FALSE){
 
     E <- as.matrix(E)
     p <- ncol(G)
@@ -87,9 +82,6 @@ testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Scor
     if (ncol(E) == 1) res$cov.G.E <- NA
     
     for (g in 1:p) {
-        # filter monomorphic or missing SNPs
-        if (maf[g] == 0) next
-        
         Xtilde <- crossprod(Mt, G[, g] * intE)
         XtX <- crossprod(Xtilde)
         XtXinv <- tryCatch(chol2inv(chol(XtX)), error = function(e) {TRUE}) # this is inverse A matrix of sandwich
@@ -122,7 +114,7 @@ testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Scor
     res$"GxE.pval" <- pchisq(res$"GxE.Stat", df = (v - 1), lower.tail = FALSE)
     res$"Joint.pval" <- pchisq(res$"Joint.Stat", df = v, lower.tail = FALSE)
 
-    return(list(res = res, GxEcovMatList  = res.Vbetas))
+    return(list(res = res, GxEcovMatList = res.Vbetas))
 }
 
 
@@ -140,9 +132,7 @@ testGenoSingleVar <- function(nullprep, G, maf, E = NULL, test = c("Wald", "Scor
     
     Xtilde <- crossprod(Mt, G)
     XtX <- crossprod(Xtilde)
-    XtXinv <- tryCatch(chol2inv(chol(XtX)), error = function(e) {
-        TRUE
-    })
+    XtXinv <- tryCatch(chol2inv(chol(XtX)), error = function(e) {TRUE})
     
     if (is.logical(XtXinv)) return(list(res = res, allelesCovMat = NA))
     
