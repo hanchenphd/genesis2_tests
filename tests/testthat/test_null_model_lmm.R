@@ -75,3 +75,47 @@ expect_true(all(abs(nullmod2$varCompCov - nullmod3$varCompCov) < 1e-5))
 
 
 })
+
+
+.testData <- function() {
+    gdsfmt::showfile.gds(closeall=TRUE, verbose=FALSE)
+    gdsfile <- seqExampleFileName("gds")
+    gds <- seqOpen(gdsfile)
+    sample.id <- seqGetData(gds, "sample.id")
+    df <- data.frame(sample.id=sample.id,
+                     sex=sample(c("M","F"), replace=TRUE, length(sample.id)),
+                     age=rnorm(length(sample.id), mean=50, sd=10),
+                     outcome=rnorm(length(sample.id), mean=10, sd=5),
+                     status=rbinom(length(sample.id), size=1, prob=0.4),
+                     stringsAsFactors=FALSE)
+    SeqVarData(gds, AnnotatedDataFrame(df))
+}
+
+.testKing <- function(gds){
+    ibd <- SNPRelate::snpgdsIBDKING(gds, verbose=FALSE)
+    kc <- ibd$kinship
+    rownames(kc) <- ibd$sample.id
+    colnames(kc) <- ibd$sample.id
+    kc
+}
+
+.testGRM <- function(seqData, ...){
+    kinship <- .testKing(seqData)
+    mypcair <- GENESIS::pcair(seqData, kinMat=kinship, divMat=kinship, verbose=FALSE, ...)
+    mypcrel <- GENESIS::pcrelate(seqData, pcMat=mypcair$vectors[,1:2], training.set=mypcair$unrels, verbose=FALSE, ...)
+    GENESIS::pcrelateMakeGRM(mypcrel)
+}
+
+test_that("real GRM", {
+    library(SeqVarTools)
+    library(Biobase)
+    svd <- .testData()
+    grm <- .testGRM(svd)
+    nullmod1 <- GENESIS::fitNullMM(sampleData(svd), outcome="outcome", covars=c("sex", "age"), covMatList=grm)
+
+    y <- sampleData(svd)$outcome
+    X <- sampleData(svd)[,c("sex", "age")]
+    nullmod2 <- fitNullModel(y, X, covMatList=grm)
+
+    seqClose(svd)
+})
