@@ -15,13 +15,13 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"),
     pval.method <- match.arg(pval.method)
     
     if (test == "SKAT") {
-        .testVariantSetSKAT(nullprep, G, weights, rho, pval.method, 
-                            return.scores, return.scores.cov)
+        out <- .testVariantSetSKAT(nullprep, G, weights, rho, pval.method, 
+                                   return.scores, return.scores.cov)
     }    
     if (test == "Burden") {
-        .testVariantSetBurden(nullprep, G, weights, burden.test)
+        out <- .testVariantSetBurden(nullprep, G, weights, burden.test)
     }
-    
+    return(out)
 }
 
 
@@ -32,12 +32,13 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"),
     
     burden <- colSums(t(G) * weights)
     if (burden.test == "Score") {
-        .testGenoSingleVarScore(nullprep$Mt, G = matrix(burden), Ytilde = nullprep$Ytilde) 
+        out <- .testGenoSingleVarScore(nullprep$Mt, G = matrix(burden), Ytilde = nullprep$Ytilde) 
     }
     if (burden.test == "Wald"){
-        .testGenoSingleVarWald(nullprep$Mt, G = matrix(burden), Ytilde = nullprep$Ytilde, sY2 = nullprep$sY2, 
+        out <- .testGenoSingleVarWald(nullprep$Mt, G = matrix(burden), Ytilde = nullprep$Ytilde, sY2 = nullprep$sY2, 
                                n = length(nullprep$Ytilde), k = nullprep$k)
     }
+    return(out)
 }
 
 
@@ -48,15 +49,16 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"),
     U <- as.vector(crossprod(G, nullprep$resid))
     G <- crossprod(nullprep$Mt, G)
     if (length(rho) == 1) {
-        .runSKATTest(scores = U, geno.adj = G,
-                     weights = weights, rho = rho, pval.method = pval.method,
-                     optimal = FALSE)
+        out <- .runSKATTest(scores = U, geno.adj = G,
+                            weights = weights, rho = rho, pval.method = pval.method,
+                            optimal = FALSE)
     } else {
         ## SKAT-O
-        .runSKATTest(scores = U, geno.adj = G,
-                     weights = weights, rho = rho, pval.method = pval.method,
-                     optimal = TRUE)
+        out <- .runSKATTest(scores = U, geno.adj = G,
+                            weights = weights, rho = rho, pval.method = pval.method,
+                            optimal = TRUE)
     }
+    return(out)
 }
 
 
