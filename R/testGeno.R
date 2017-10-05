@@ -36,8 +36,8 @@ testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), 
     score <- as.vector(crossprod(Xtilde, Ytilde)) # X^T P Y
     Stat <- score/sqrt(XtX)
     
-    res <- data.frame(Score = score, Score.SE = sqrt(XtX), Score.Stat = Stat, 
-                      Score.pval = pchisq(Stat^2, df = 1, lower.tail = FALSE) )
+    res <- cbind(Score = score, Score.SE = sqrt(XtX), Score.Stat = Stat, 
+                 Score.pval = pchisq(Stat^2, df = 1, lower.tail = FALSE) )
     
     return(res)	
 }
@@ -52,8 +52,8 @@ testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), 
     RSS <- as.numeric((sY2 - XtY * beta)/(n - k - 1))
     Vbeta <- RSS/XtX
     Stat <- beta/sqrt(Vbeta)
-    res <- data.frame(Est = beta, Est.SE = sqrt(Vbeta), Wald.Stat = Stat, 
-                      Wald.pval = pchisq(Stat^2, df = 1, lower.tail = FALSE))
+    res <- cbind(Est = beta, Est.SE = sqrt(Vbeta), Wald.Stat = Stat, 
+                 Wald.pval = pchisq(Stat^2, df = 1, lower.tail = FALSE))
     return(res)	
 }
 
@@ -79,7 +79,7 @@ testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), 
                   dimnames = list(NULL, 
                                   c(paste0("Est.", var.names), paste0("SE.", var.names), "GxE.Stat", "Joint.Stat" ) ))
     
-    if (ncol(E) == 1) res$cov.G.E <- NA
+    if (ncol(E) == 1) res[,"cov.G.E"] <- NA
     
     for (g in 1:p) {
         Xtilde <- crossprod(Mt, G[, g] * intE)
@@ -111,8 +111,8 @@ testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), 
                                          error = function(e) { NA })
     }
     
-    res$"GxE.pval" <- pchisq(res$"GxE.Stat", df = (v - 1), lower.tail = FALSE)
-    res$"Joint.pval" <- pchisq(res$"Joint.Stat", df = v, lower.tail = FALSE)
+    res[,"GxE.pval"] <- pchisq(res[,"GxE.Stat"], df = (v - 1), lower.tail = FALSE)
+    res[,"Joint.pval"] <- pchisq(res[,"Joint.Stat"], df = v, lower.tail = FALSE)
 
     return(list(res = res, GxEcovMatList = res.Vbetas))
 }
@@ -149,7 +149,7 @@ testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), 
                                                crossprod(XtX, betas))/RSS, 
                                      error = function(e) { NA })
     
-    res$"Joint.pval" <- pchisq(res$"Joint.Stat", df = v, lower.tail = FALSE)
+    res[,"Joint.pval"] <- pchisq(res[,"Joint.Stat"], df = v, lower.tail = FALSE)
     return(list(res = res, allelesCovMat = Vbetas))
 }
 
