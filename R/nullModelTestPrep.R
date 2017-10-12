@@ -57,7 +57,7 @@ nullModelBRprep <- function(nullmod){
     
     probs <- nullmod$fitted.values
     
-    return(probs)
+    return(list(D =nullmod$outcome, probs = probs))
     
 }
 
