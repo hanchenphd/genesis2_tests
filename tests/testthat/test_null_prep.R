@@ -23,6 +23,7 @@ test_that("nullModelTestPrep vs calculateProjection", {
         proj <- GENESIS:::.calculateProjection(nullmod.orig, test="", burden.test="")
 
         expect_true(all(abs(nullprep$Mt - proj$Mt) < 1e-9))
+        #expect_true(all(abs(nullprep$resid - proj$resid) < 1e-9))
         
         # with covMatList
 	nullmod <- fitNullModel(y, X, covMatList=covMatList, verbose=FALSE)
@@ -31,11 +32,17 @@ test_that("nullModelTestPrep vs calculateProjection", {
         nullmod.orig <- GENESIS::fitNullMM(dat, outcome="y", covars=paste0("X",1:3), covMatList=covMatList, verbose=FALSE)
         proj <- GENESIS:::.calculateProjection(nullmod.orig, test="", burden.test="")
 
+        expect_true(all(abs(nullprep$Mt - proj$Mt) < 1e-9))
+        expect_true(all(abs(nullprep$resid - proj$resid) < 1e-9))
+        
         # with group
 	nullmod <- fitNullModel(y, X, group.idx = group.idx, covMatList=covMatList, verbose=FALSE)
 	nullprep <- nullModelTestPrep(nullmod)
 
-        nullmod.orig <- GENESIS::fitNullMM(dat, outcome="y", covars=paste0("X",1:3), covMatList=covMatList, group.var=group, verbose=FALSE)
+        nullmod.orig <- GENESIS::fitNullMM(dat, outcome="y", covars=paste0("X",1:3), covMatList=covMatList, group.var="group", verbose=FALSE)
         proj <- GENESIS:::.calculateProjection(nullmod.orig, test="", burden.test="")
 
+        expect_true(all(abs(nullprep$Mt - proj$Mt) < 1e-9))
+        expect_true(all(abs(nullprep$resid - proj$resid) < 1e-9))
+        
 }
