@@ -1,8 +1,14 @@
 context("check variant set association tests")
 
-.testNullPrep <- function(n, MM=FALSE) {
-	X <- cbind(1, rnorm(n), rbinom(n, size = 1, prob = 0.5))
+.testNullPrep <- function(n, MM=FALSE, binary=FALSE) {
+    X <- cbind(1, rnorm(n), rbinom(n, size = 1, prob = 0.5))
+    if (!binary) {
 	y <- X %*% c(1, 0.5, 1) + rnorm(n, sd = c(rep(4, n/2), rep(2, n/2)))
+        family <- "gaussian"
+    }  else {
+        y <- rbinom(n, size = 1, prob = 0.4)
+        family <- "binomial"
+    }
 	
 	group.idx <- list(G1 = c(1:(n/2)), G2 = c((n/2 + 1):n))
 
@@ -14,7 +20,7 @@ context("check variant set association tests")
             covMatList <- NULL
         }
 	
-	nullmod <- fitNullModel(y, X, covMatList = covMatList, group.idx = group.idx, verbose=FALSE)
+	nullmod <- fitNullModel(y, X, covMatList = covMatList, group.idx = group.idx, family=family, verbose=FALSE)
 	
 	nullModelTestPrep(nullmod)
 }
@@ -35,6 +41,18 @@ test_that("SKAT with rho=1 matches burden", {
         
         ## basic
 	nullprep <- .testNullPrep(n, MM=FALSE)
+        skat <- .testVariantSetSKAT(nullprep, geno, weights, rho=1, pval.method="davies")
+        burden <- .testVariantSetBurden(nullprep, geno, weights, burden.test="Score")
+        expect_true(abs(skat$pval_1 - burden$Score.pval) < 0.01)
+        
+        ## mixed model - binary
+	nullprep <- .testNullPrep(n, MM=TRUE, binary=TRUE)
+        skat <- .testVariantSetSKAT(nullprep, geno, weights, rho=1, pval.method="davies")
+        burden <- .testVariantSetBurden(nullprep, geno, weights, burden.test="Score")
+        expect_true(abs(skat$pval_1 - burden$Score.pval) < 0.01)
+        
+        ## basic - binary
+	nullprep <- .testNullPrep(n, MM=FALSE, binary=TRUE)
         skat <- .testVariantSetSKAT(nullprep, geno, weights, rho=1, pval.method="davies")
         burden <- .testVariantSetBurden(nullprep, geno, weights, burden.test="Score")
         expect_true(abs(skat$pval_1 - burden$Score.pval) < 0.01)
