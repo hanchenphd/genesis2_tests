@@ -18,7 +18,7 @@ testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), 
     }
     
     if (test == "Wald" & !is.null(E)){
-        res <- .testGenoSingleVarWaldGxE(nullprep$Mt, G, E, nullprep$Ytilde, nullprep$sY2, n, nullprep$ k)
+        res <- .testGenoSingleVarWaldGxE(nullprep$Mt, G, E, nullprep$Ytilde, nullprep$sY2, n, nullprep$k, GxE.return.cov.mat=GxE.return.cov)
     }
     
     if (test == "Score"){
@@ -36,10 +36,10 @@ testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), 
     score <- as.vector(crossprod(Xtilde, Ytilde)) # X^T P Y
     Stat <- score/sqrt(XtX)
     
-    res <- cbind(Score = score, Score.SE = sqrt(XtX), Score.Stat = Stat, 
-                 Score.pval = pchisq(Stat^2, df = 1, lower.tail = FALSE) )
+    res <- data.frame(Score = score, Score.SE = sqrt(XtX), Score.Stat = Stat, 
+                      Score.pval = pchisq(Stat^2, df = 1, lower.tail = FALSE) )
     
-    return(res)	
+    return(res)
 }
 
 
@@ -52,9 +52,9 @@ testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), 
     RSS <- as.numeric((sY2 - XtY * beta)/(n - k - 1))
     Vbeta <- RSS/XtX
     Stat <- beta/sqrt(Vbeta)
-    res <- cbind(Est = beta, Est.SE = sqrt(Vbeta), Wald.Stat = Stat, 
-                 Wald.pval = pchisq(Stat^2, df = 1, lower.tail = FALSE))
-    return(res)	
+    res <- data.frame(Est = beta, Est.SE = sqrt(Vbeta), Wald.Stat = Stat, 
+                      Wald.pval = pchisq(Stat^2, df = 1, lower.tail = FALSE))
+    return(res)
 }
 
 
@@ -67,8 +67,6 @@ testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), 
     
     if (GxE.return.cov.mat) {
         res.Vbetas <- vector(mode = "list", length = p)
-    } else {
-        res.Vbetas <- NULL
     }
     
     intE <- cbind(1, E) # add intercept the "Environmental" variable E.
@@ -113,8 +111,13 @@ testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), 
     
     res[,"GxE.pval"] <- pchisq(res[,"GxE.Stat"], df = (v - 1), lower.tail = FALSE)
     res[,"Joint.pval"] <- pchisq(res[,"Joint.Stat"], df = v, lower.tail = FALSE)
-
-    return(list(res = res, GxEcovMatList = res.Vbetas))
+    
+    res <- as.data.frame(res)
+    if (GxE.return.cov.mat) {
+        return(list(res = res, GxEcovMatList = res.Vbetas))
+    } else {
+        return(res)
+    }
 }
 
 
@@ -150,6 +153,8 @@ testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), 
                                      error = function(e) { NA })
     
     res[,"Joint.pval"] <- pchisq(res[,"Joint.Stat"], df = v, lower.tail = FALSE)
+    
+    res <- as.data.frame(res)
     return(list(res = res, allelesCovMat = Vbetas))
 }
 

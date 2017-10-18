@@ -7,20 +7,12 @@ test_that("singleVarTest", {
 	
 	group.idx <- list(G1 = c(1:(n/2)), G2 = c((n/2 + 1):n))
 	
-	cor.mat <- matrix(rnorm(n*n, sd = 0.05),n,n)
-	cor.mat <- crossprod(cor.mat)
-	covMatList <- list(A = cor.mat)
-	
 	nullmod <- fitNullModel(y, X, group.idx = group.idx, verbose=FALSE)
 	
-	### create a matrix of genetic variants to test.
-	geno <- matrix(rbinom(200*n, size = 2, prob = 0.2), nrow = n, ncol = 200)
-
 	nullprep <- nullModelTestPrep(nullmod)
 
-	expect_equal(nullprep$k, ncol(X))
-	expect_equal(dim(nullprep$Mt), c(n, n))
-	expect_equal(dim(nullprep$Ytilde), dim(y))
+	### create a matrix of genetic variants to test.
+	geno <- matrix(rbinom(200*n, size = 2, prob = 0.2), nrow = n, ncol = 200)
 
 	test.wald <- testGenoSingleVar(nullprep, G = geno, E = NULL, test = c("Wald"), GxE.return.cov = FALSE)
 	

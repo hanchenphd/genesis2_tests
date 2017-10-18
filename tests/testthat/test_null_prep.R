@@ -1,5 +1,31 @@
 context("check null model prep")
 
+test_that("nullModelTestPrep") {
+	n <- 100
+	X <- cbind(1, rnorm(n), rbinom(n, size = 1, prob = 0.5))
+	y <- X %*% c(1, 0.5, 1) + rnorm(n, sd = c(rep(4, n/2), rep(2, n/2)))
+
+	cor.mat <- matrix(rnorm(n*n, sd = 0.05),n,n, dimnames=list(1:n, 1:n))
+	cor.mat <- crossprod(cor.mat)
+	covMatList <- list(A = cor.mat)
+
+        # basic
+	nullmod <- fitNullModel(y, X, verbose=FALSE)
+	nullprep <- nullModelTestPrep(nullmod)
+
+	expect_equal(nullprep$k, ncol(X))
+	expect_equal(dim(nullprep$Mt), c(n, n))
+	expect_equal(dim(nullprep$Ytilde), dim(y))
+
+        # with covMatList
+	nullmod <- fitNullModel(y, X, covMatList=covMatList, verbose=FALSE)
+	nullprep <- nullModelTestPrep(nullmod)
+
+	expect_equal(nullprep$k, ncol(X))
+	expect_equal(dim(nullprep$Mt), c(n, n))
+	expect_equal(dim(nullprep$Ytilde), dim(y))
+})
+
 test_that("nullModelTestPrep vs calculateProjection", {
 	n <- 100
 	X <- cbind(1, rnorm(n), rbinom(n, size = 1, prob = 0.5))

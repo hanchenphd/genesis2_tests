@@ -67,14 +67,16 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"),
     # covariance of scores
     V <- crossprod(geno.adj)
     
-    # vector to hold output
-    out <- numeric(length = 3*length(rho))
-    names(out)  <- c(paste("Q",rho,sep="_"), paste("pval",rho,sep="_"), paste("err",rho,sep="_"))
+    # vectors to hold output
+    nrho <- length(rho)
+    out.Q <- rep(NA, nrho); names(out.Q) <- paste("Q", rho, sep="_")
+    out.pval <- rep(NA, nrho); names(out.pval) <- paste("pval", rho, sep="_")
+    out.err <- rep(NA, nrho); names(out.err) <- paste("err", rho, sep="_")
 
     # for SKAT-O need to save lambdas
-    if(optimal){ lambdas <- vector("list",length(rho)) }
+    if(optimal){ lambdas <- vector("list", nrho) }
 
-    for(i in 1:length(rho)){
+    for(i in 1:nrho){
         if(rho[i] == 0){
             # Variance Component Test
             Q <- sum((weights*scores)^2) # sum[(w*scores)^2]  # for some reason SKAT_emmaX divides this by 2
@@ -128,31 +130,26 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"),
         }
 
         # update results
-        out[c(paste("Q",rho[i],sep="_"), paste("pval",rho[i],sep="_"), paste("err",rho[i],sep="_"))] <- c(Q, pval, err)
+        out.Q[i] <- Q
+        out.pval[i] <- pval
+        out.err[i] <- err
     }
+    out <- as.list(c(out.Q, out.pval, out.err))
 
     # SKAT-O
     if(optimal){
-        # vector for output
-        out2 <- rep(NA, 3)
-        names(out2) <- c("min.pval", "opt.rho", "pval_SKATO")
-
         if(length(scores) == 1){
             # pvalue is the same for all rhos
-            pval <- out[grep("pval", names(out))][1]
-            out2["min.pval"] <- pval
-            out2["pval_SKATO"] <- pval
+            out2 <- list(min.pval=out.pval[1], opt.rho=NA, pval_SKATO=out.pval[1])
 
         }else{
             # find the minimum p-value
-            pval <- out[grep("pval", names(out))]
-            minp <- min(pval)
-            out2["min.pval"] <- minp
-            out2["opt.rho"] <- rho[which.min(pval)]
+            minp <- min(out.pval)
+            out2 <- list(min.pval=minp, opt.rho=rho[which.min(out.pval)])
 
             # get qmin(rho); i.e. the (1-minp)th percentile of dist of each Q
-            qmin <- rep(NA, length(rho))
-            for(i in 1:length(rho)){
+            qmin <- rep(NA, nrho)
+            for(i in 1:nrho){
                 qmin[i] <- skatO_qchisqsum(minp, lambdas[[i]])
             }
 
@@ -181,11 +178,11 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"),
             re <- tryCatch({
                 integrate(integrateFxn, lower = 0, upper = 40, subdivisions = 2000, qmin = qmin, otherParams = otherParams, tau = tau, rho = rho, abs.tol = 10^-25)
             }, error=function(e) NA)
-            out2["pval_SKATO"] <- 1-re[[1]]
+            out2[["pval_SKATO"]] <- 1-re[[1]]
         }
         
         # update results
-        out <- append(out, out2)
+        out <- c(out, out2)
     }
 
     # return results
