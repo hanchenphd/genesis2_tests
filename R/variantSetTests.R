@@ -32,7 +32,7 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"),
     
     burden <- colSums(t(G) * weights)
     if (burden.test == "Score") {
-        out <- .testGenoSingleVarScore(nullprep$Mt, G = matrix(burden), Ytilde = nullprep$Ytilde) 
+        out <- .testGenoSingleVarScore(nullprep$Mt, G = matrix(burden), resid = nullprep$resid) 
     }
     if (burden.test == "Wald"){
         out <- .testGenoSingleVarWald(nullprep$Mt, G = matrix(burden), Ytilde = nullprep$Ytilde, sY2 = nullprep$sY2, 

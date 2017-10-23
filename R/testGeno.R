@@ -65,10 +65,10 @@ testGenoSingleVar <- function(nullprep, G, E = NULL, test = c("Wald", "Score"), 
 
 
 
-.testGenoSingleVarScore <- function(Mt, G, Ytilde){
+.testGenoSingleVarScore <- function(Mt, G, resid){
     Xtilde <- crossprod(Mt, G) # adjust genotypes for correlation structure and fixed effects
     XtX <- colSums(Xtilde^2) # vector of X^T P X (for each SNP) b/c (M^T M) = P
-    score <- as.vector(crossprod(Xtilde, Ytilde)) # X^T P Y
+    score <- as.vector(crossprod(G, resid)) # X^T P Y
     Stat <- score/sqrt(XtX)
     
     res <- data.frame(Score = score, Score.SE = sqrt(XtX), Score.Stat = Stat, 
