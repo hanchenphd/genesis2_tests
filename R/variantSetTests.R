@@ -63,6 +63,50 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"),
 
 
 
+.testVariantSetHybrid <- function(nullprep, G, weights, pval.method) {
+    G <- t(t(G) * weights)
+    U <- as.vector(crossprod(G, nullprep$resid))
+    G <- crossprod(nullprep$Mt, G)
+    V <- crossprod(G)
+    burden.scores <- sum(U)
+    burden.distMat <- sum(V)
+    burden.pval <- pchisq(burden.scores^2/burden.distMat, df=1, lower.tail=FALSE)
+    V.rowSums <- rowSums(V)
+    U <- U - V.rowSums * burden.scores / burden.distMat
+    V <- V - tcrossprod(V.rowSums) / burden.distMat
+    Q <- sum(U^2)
+    # lambda for p value calculation
+    lambda <- eigen(V, only.values = TRUE, symmetric=TRUE)$values
+    lambda <- lambda[lambda > 0]
+    if(!requireNamespace("survey")) stop("package 'survey' must be installed to calculate p-values for SKAT")
+    if(!requireNamespace("CompQuadForm")) stop("package 'CompQuadForm' must be installed to calculate p-values for SKAT")
+    if(pval.method == "kuonen"){
+        pval <- survey:::saddle(x = Q, lambda = lambda)
+        err <- ifelse(is.na(pval), 1, 0)
+    }else if(pval.method == "davies"){
+        tmp <- suppressWarnings(CompQuadForm::davies(q = Q, lambda = lambda, acc = 1e-06))
+        pval <- tmp$Qq
+        if((tmp$ifault > 0) | (pval <= 0) | (pval >= 1)) {
+            pval <- survey:::saddle(x = Q, lambda = lambda)
+        }
+        err <- ifelse(is.na(pval), 1, 0)
+
+    }else if(pval.method == "liu"){
+        pval <- CompQuadForm::liu(q = Q, lambda = lambda)
+        err <- 0
+    }
+    
+    if(err > 0){
+        pval <- CompQuadForm::liu(q = Q, lambda = lambda)
+    }
+    out.err <- err
+    out.pval <- tryCatch(pchisq(-2*log(burden.pval)-2*log(pval), df=4, lower.tail = FALSE), error = function(e) { NA })
+    out <- as.list(c(out.pval, out.err))
+    return(out)
+}
+
+
+
 .runSKATTest <- function(scores, geno.adj, weights, rho, pval.method, optimal){
     # covariance of scores
     V <- crossprod(geno.adj)
