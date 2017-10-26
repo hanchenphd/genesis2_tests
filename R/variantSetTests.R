@@ -5,7 +5,7 @@
 ## Variant set: SKAT, burden, SKAT-O. Multiple types of p-values. Default: Davies with Kuonen if does not converge. 
 
 
-testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"), 
+testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT", "Hybrid"), 
                            burden.test = c("Score", "Wald"),  rho = 0,
                            pval.method = c("davies", "kuonen", "liu"), 
                            return.scores = FALSE, return.scores.cov = FALSE){
@@ -20,6 +20,9 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"),
     }    
     if (test == "Burden") {
         out <- .testVariantSetBurden(nullprep, G, weights, burden.test)
+    }
+    if (test == "Hybrid") {
+        out <- .testVariantSetHybrid(nullprep, G, weights, pval.method)
     }
     return(out)
 }
@@ -80,6 +83,7 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"),
     lambda <- lambda[lambda > 0]
     if(!requireNamespace("survey")) stop("package 'survey' must be installed to calculate p-values for SKAT")
     if(!requireNamespace("CompQuadForm")) stop("package 'CompQuadForm' must be installed to calculate p-values for SKAT")
+    err <- 0
     if(pval.method == "kuonen"){
         pval <- survey:::saddle(x = Q, lambda = lambda)
         err <- ifelse(is.na(pval), 1, 0)
@@ -101,6 +105,7 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT"),
     }
     out.err <- err
     out.pval <- tryCatch(pchisq(-2*log(burden.pval)-2*log(pval), df=4, lower.tail = FALSE), error = function(e) { NA })
+    if(is.na(out.pval)) out.err <- 1
     out <- as.list(c(out.pval, out.err))
     return(out)
 }
