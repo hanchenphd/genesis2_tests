@@ -74,6 +74,7 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT", "Hyb
     burden.scores <- sum(U)
     burden.distMat <- sum(V)
     burden.pval <- pchisq(burden.scores^2/burden.distMat, df=1, lower.tail=FALSE)
+    if(length(U) == 1) return(list(out.pval=burden.pval, out.err=0))
     V.rowSums <- rowSums(V)
     U <- U - V.rowSums * burden.scores / burden.distMat
     V <- V - tcrossprod(V.rowSums) / burden.distMat
