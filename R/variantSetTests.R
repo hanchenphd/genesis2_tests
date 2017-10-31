@@ -77,7 +77,7 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT", "Hyb
     V.rowSums <- rowSums(V)
     U <- U - V.rowSums * burden.scores / burden.distMat
     V <- V - tcrossprod(V.rowSums) / burden.distMat
-    if(mean(abs(V)) < sqrt(.Machine$double.eps)) return(list(out.pval=burden.pval, out.err=0))
+    if(mean(abs(V)) < sqrt(.Machine$double.eps)) return(list(pval_burden=burden.pval, pval_hybrid=burden.pval, err=0))
     Q <- sum(U^2)
     # lambda for p value calculation
     lambda <- eigen(V, only.values = TRUE, symmetric=TRUE)$values
@@ -104,10 +104,9 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT", "Hyb
     if(err > 0){
         pval <- CompQuadForm::liu(q = Q, lambda = lambda)
     }
-    out.err <- err
     out.pval <- tryCatch(pchisq(-2*log(burden.pval)-2*log(pval), df=4, lower.tail = FALSE), error = function(e) { NA })
-    if(is.na(out.pval)) out.err <- 1
-    out <- as.list(c(out.pval, out.err))
+    if(is.na(out.pval)) err <- 1
+    out <- list(pval_burden=burden.pval, pval_hybrid=out.pval, err=err)
     return(out)
 }
 
