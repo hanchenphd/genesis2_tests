@@ -74,10 +74,10 @@ testVariantSet <- function(nullprep, G, weights, test = c("Burden", "SKAT", "Hyb
     burden.scores <- sum(U)
     burden.distMat <- sum(V)
     burden.pval <- pchisq(burden.scores^2/burden.distMat, df=1, lower.tail=FALSE)
-    if(length(U) == 1) return(list(out.pval=burden.pval, out.err=0))
     V.rowSums <- rowSums(V)
     U <- U - V.rowSums * burden.scores / burden.distMat
     V <- V - tcrossprod(V.rowSums) / burden.distMat
+    if(mean(abs(V)) < sqrt(.Machine$double.eps)) return(list(out.pval=burden.pval, out.err=0))
     Q <- sum(U^2)
     # lambda for p value calculation
     lambda <- eigen(V, only.values = TRUE, symmetric=TRUE)$values
